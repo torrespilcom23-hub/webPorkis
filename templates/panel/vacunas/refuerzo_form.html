@@ -1,0 +1,141 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Registrar refuerzo{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Siguiente dosis de <strong>{{ anterior.vacuna.nombre }}</strong> para <strong>{{ cerdo.arete }}</strong>{% if cerdo.nombre %} · {{ cerdo.nombre }}{% endif %}.
+</p>
+
+<div class="refuerzo-resumen">
+    <div class="refuerzo-resumen__item">
+        <span class="refuerzo-resumen__label">Última dosis</span>
+        <span class="refuerzo-resumen__value">{{ anterior.fecha_aplicacion|date:"d/m/Y" }} · {{ anterior.dosis }}</span>
+    </div>
+    {% if anterior.proxima_dosis %}
+    <div class="refuerzo-resumen__item">
+        <span class="refuerzo-resumen__label">Próxima programada</span>
+        <span class="refuerzo-resumen__value">
+            {% if anterior.proxima_dosis > hoy %}
+            <span class="badge badge-warning">{{ anterior.proxima_dosis|date:"d/m/Y" }}</span>
+            {% elif anterior.proxima_dosis < hoy %}
+            <span class="badge badge-danger">{{ anterior.proxima_dosis|date:"d/m/Y" }} · vencida</span>
+            {% else %}
+            <span class="badge badge-warning">{{ anterior.proxima_dosis|date:"d/m/Y" }} · hoy</span>
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+{% if not puede_registrar %}
+<div class="alert alert-info panel-hint refuerzo-info">
+    La última dosis fue el <strong>{{ anterior.fecha_aplicacion|date:"d/m/Y" }}</strong>.
+    Podrá registrar el refuerzo a partir del <strong>{{ min_fecha_refuerzo|date:"d/m/Y" }}</strong>
+    (debe pasar al menos un día).
+</div>
+<div class="form-actions btn-group">
+    <a href="{% url 'vacunas:aplicaciones' %}" class="btn-sm btn-secondary">Volver a aplicaciones</a>
+    <a href="{% url 'registro:cerdo_detalle' cerdo.pk %}" class="btn-sm btn-secondary">Ver ficha del cerdo</a>
+</div>
+{% else %}
+
+{% if anterior.proxima_dosis %}
+<div class="alert alert-info panel-hint refuerzo-info">
+    {% if anterior.proxima_dosis > hoy %}
+    Refuerzo previsto para el <strong>{{ anterior.proxima_dosis|date:"d/m/Y" }}</strong>.
+    Si ya lo aplicó antes, indique la fecha real abajo.
+    {% elif anterior.proxima_dosis == hoy %}
+    Hoy corresponde el refuerzo programado.
+    {% else %}
+    El refuerzo debió aplicarse el <strong>{{ anterior.proxima_dosis|date:"d/m/Y" }}</strong>.
+    Indique cuándo se aplicó realmente.
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="panel-table-wrap refuerzo-form-wrap">
+    <div class="panel-table-header"><h2>Datos del refuerzo</h2></div>
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <div class="form-grid-compact refuerzo-form-grid">
+            <div class="form-row form-row--fecha">
+                <label for="{{ form.fecha_aplicacion.id_for_label }}">{{ form.fecha_aplicacion.label }}</label>
+                {{ form.fecha_aplicacion }}
+                <small class="field-hint">
+                    Desde {{ min_fecha_refuerzo|date:"d/m/Y" }} hasta hoy ({{ hoy|date:"d/m/Y" }}).
+                </small>
+                {% if form.fecha_aplicacion.errors %}<span class="field-error">{{ form.fecha_aplicacion.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--dosis">
+                <label for="{{ form.dosis.id_for_label }}">{{ form.dosis.label }}</label>
+                {{ form.dosis }}
+                {% if form.dosis.errors %}<span class="field-error">{{ form.dosis.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--lote">
+                <label for="{{ form.lote_medicamento.id_for_label }}">{{ form.lote_medicamento.label }} <span class="label-opt">opcional</span></label>
+                {{ form.lote_medicamento }}
+            </div>
+            <div class="form-row form-row--obs">
+                <label for="{{ form.observaciones.id_for_label }}">{{ form.observaciones.label }} <span class="label-opt">opcional</span></label>
+                {{ form.observaciones }}
+            </div>
+        </div>
+
+        {% if intervalo %}
+        <p id="refuerzo-proxima-preview" class="refuerzo-preview" data-intervalo="{{ intervalo }}">
+            Al guardar, la próxima dosis quedará en
+            <strong id="refuerzo-proxima-fecha">{% if proxima_estimada %}{{ proxima_estimada|date:"d/m/Y" }}{% else %}—{% endif %}</strong>
+            <span class="refuerzo-preview__note">({{ intervalo }} días después de la fecha del refuerzo)</span>
+        </p>
+        {% else %}
+        <p class="refuerzo-preview refuerzo-preview--muted">Esta vacuna no tiene intervalo en catálogo; la próxima dosis deberá registrarse manualmente al editar.</p>
+        {% endif %}
+
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Registrar refuerzo</button>
+            <a href="{% url 'vacunas:aplicaciones' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% if intervalo %}
+<script>
+(function () {
+    var fecha = document.getElementById('{{ form.fecha_aplicacion.id_for_label }}');
+    var preview = document.getElementById('refuerzo-proxima-fecha');
+    var box = document.getElementById('refuerzo-proxima-preview');
+    if (!fecha || !preview || !box) return;
+    var dias = parseInt(box.dataset.intervalo, 10);
+
+    function addDaysIso(iso, n) {
+        var p = iso.split('-');
+        var d = new Date(+p[0], +p[1] - 1, +p[2]);
+        d.setDate(d.getDate() + n);
+        return String(d.getDate()).padStart(2, '0') + '/'
+            + String(d.getMonth() + 1).padStart(2, '0') + '/'
+            + d.getFullYear();
+    }
+
+    function ajustarRango() {
+        if (!fecha.value) return;
+        if (fecha.min && fecha.value < fecha.min) fecha.value = fecha.min;
+        if (fecha.max && fecha.value > fecha.max) fecha.value = fecha.max;
+    }
+
+    function actualizar() {
+        ajustarRango();
+        if (!fecha.value) return;
+        preview.textContent = addDaysIso(fecha.value, dias);
+    }
+
+    fecha.addEventListener('change', actualizar);
+    fecha.addEventListener('input', actualizar);
+    actualizar();
+})();
+</script>
+{% endif %}
+{% endif %}
+{% endblock %}

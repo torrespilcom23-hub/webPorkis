@@ -1,0 +1,131 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Alimentos{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Anote cuánto alimento se <strong>sirvió</strong> a cada lote (grupo de cerdos) por día.
+</p>
+
+{% include 'panel/alimentos/_flujo_lote.html' %}
+
+{% if total_tipos == 0 %}
+<div class="alert alert-success panel-hint">
+    <strong>Primer paso:</strong> agregue alimentos en <a href="{% url 'alimentos:catalogo' %}">Catálogo</a>.
+    Si aún no tiene lotes, créelos en <a href="{% url 'registro:lotes' %}">Registro → Lotes</a>.
+</div>
+{% endif %}
+
+{% include 'panel/alimentos/_tabs.html' %}
+
+<div class="kpi-grid kpi-grid--compact">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ page_obj.paginator.count }}</div>
+        <div class="kpi-label">Resultados</div>
+    </div>
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ registros_mes }}</div>
+        <div class="kpi-label">Registros este mes</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value">{{ kg_servido_mes|floatformat:1 }}</div>
+        <div class="kpi-label">kg servidos (mes)</div>
+    </div>
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Historial de consumo</h2>
+        <div class="btn-group">
+            <a href="{% url 'alimentos:registro_crear' %}" class="btn-sm btn-panel"{% if total_tipos == 0 %} title="Primero agregue alimentos al catálogo"{% endif %}>+ Registrar consumo</a>
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form filtros-form--inline">
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Lote o alimento…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-lote">Lote</label>
+                <select name="lote" id="f-lote" class="filtro-input" title="Grupo de cerdos (Registro → Lotes)">
+                    <option value="">Todos</option>
+                    {% for l in lotes_cat %}
+                    <option value="{{ l.pk }}" {% if lote_id == l.pk|stringformat:'i' %}selected{% endif %}>{{ l.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-tipo">Alimento</label>
+                <select name="tipo" id="f-tipo" class="filtro-input">
+                    <option value="">Todos</option>
+                    {% for t in tipos_cat %}
+                    <option value="{{ t.pk }}" {% if tipo_id == t.pk|stringformat:'i' %}selected{% endif %}>{{ t.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-desde">Desde</label>
+                <input type="date" name="desde" id="f-desde" value="{{ desde }}" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-hasta">Hasta</label>
+                <input type="date" name="hasta" id="f-hasta" value="{{ hasta }}" class="filtro-input">
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% url 'alimentos:index' %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="panel-table">
+        <thead><tr>
+            <th>Fecha</th>
+            <th>Lote <span class="th-hint" title="Grupo de cerdos definido en Registro → Lotes">ⓘ</span></th>
+            <th>Alimento</th><th>Servido</th>
+            <th>Sobrante</th><th>Observaciones</th><th>Registró</th><th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for r in registros %}
+            <tr>
+                <td>{{ r.fecha|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="{% url 'alimentos:planes' %}?q={{ r.lote.nombre|urlencode }}" title="Ver ración de este lote"><strong>{{ r.lote.nombre }}</strong></a>
+                </td>
+                <td>{{ r.tipo_alimento.nombre }}</td>
+                <td>{{ r.cantidad_servida_kg }} kg</td>
+                <td>{% if r.cantidad_sobrante_kg is not None %}{{ r.cantidad_sobrante_kg }} kg{% else %}—{% endif %}</td>
+                <td class="catalog-indicaciones">
+                    {% if r.observaciones %}
+                    <p class="catalog-indicaciones__text" title="{{ r.observaciones }}">{{ r.observaciones|truncatechars:80 }}</p>
+                    {% else %}
+                    <span class="catalog-indicaciones--empty">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ r.registrado_por.username }}</td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'alimentos:registro_editar' r.pk %}" class="btn-sm btn-secondary">Editar</a>
+                        <a href="{% url 'alimentos:registro_eliminar' r.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="table-empty">No hay registros de consumo{% if q or lote_id or tipo_id or desde or hasta %} con estos filtros{% endif %}.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% for servicio in servicios %}
+<article class="card {% if preview %}service-preview-card{% else %}service-card{% endif %} fade-in">
+    <span class="service-icon">{{ servicio.icono }}</span>
+    {% if preview %}
+    <h3>{{ servicio.titulo }}</h3>
+    {% else %}
+    <h2>{{ servicio.titulo }}</h2>
+    {% endif %}
+    <p>{% if preview %}{{ servicio.descripcion|truncatewords:20 }}{% else %}{{ servicio.descripcion }}{% endif %}</p>
+    {% if not preview and servicio.beneficios_lista %}
+    <ul class="benefits-list">
+        {% for beneficio in servicio.beneficios_lista %}
+        <li>{{ beneficio }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</article>
+{% endfor %}

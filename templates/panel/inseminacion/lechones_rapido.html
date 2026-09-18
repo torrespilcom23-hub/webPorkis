@@ -1,0 +1,52 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Alta rápida — parto {{ parto.fecha|date:"d/m/Y" }} · madre <strong>{{ parto.madre.arete }}</strong>
+    · pendientes: <strong>{{ parto.lechones_pendientes_alta }}</strong>
+</p>
+
+{% include 'panel/inseminacion/_tabs.html' %}
+
+<div class="panel-table-wrap catalog-form-wrap repro-form-wrap">
+    <div class="repro-form-head">
+        <h2>Registrar camada</h2>
+        <a href="{% url 'inseminacion:parto_lechones' parto.pk %}" class="btn-sm btn-secondary">← Elegir otro modo</a>
+    </div>
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <h3 class="repro-form-section">Cantidad</h3>
+        <div class="form-grid-compact catalog-form-grid catalog-form-grid--lechones">
+            <div class="form-row">
+                <label for="{{ form.cantidad.id_for_label }}">{{ form.cantidad.label }}</label>
+                {{ form.cantidad }}
+                <small class="field-hint">Máximo {{ parto.lechones_pendientes_alta }}</small>
+                {% if form.cantidad.errors %}<span class="field-error">{{ form.cantidad.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label for="{{ form.machos.id_for_label }}">{{ form.machos.label }}</label>
+                {{ form.machos }}
+                {% if form.machos.errors %}<span class="field-error">{{ form.machos.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label for="{{ form.hembras.id_for_label }}">{{ form.hembras.label }}</label>
+                {{ form.hembras }}
+                <small class="field-hint">Machos + hembras = cantidad</small>
+                {% if form.hembras.errors %}<span class="field-error">{{ form.hembras.errors.0 }}</span>{% endif %}
+            </div>
+        </div>
+
+        <h3 class="repro-form-section">Datos comunes</h3>
+        {% include 'panel/inseminacion/_lechones_campos_comunes.html' with form=form prefix='id_' form_id='rap' %}
+
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Dar de alta en Registro</button>
+            <a href="{% url 'inseminacion:parto_lechones' parto.pk %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

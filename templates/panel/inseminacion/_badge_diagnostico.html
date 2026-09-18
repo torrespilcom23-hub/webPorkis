@@ -1,0 +1,16 @@
+{% if inseminacion.tiene_diagnostico %}
+    {% if inseminacion.diagnostico.resultado == 'positivo' %}
+    <span class="repro-estado repro-estado--ok">{{ inseminacion.diagnostico.get_resultado_display }}</span>
+    {% elif inseminacion.diagnostico.resultado == 'negativo' %}
+    <span class="repro-estado repro-estado--no">{{ inseminacion.diagnostico.get_resultado_display }}</span>
+    {% else %}
+    <span class="repro-estado repro-estado--warn">{{ inseminacion.diagnostico.get_resultado_display }}</span>
+    {% endif %}
+    <span class="repro-estado__fecha">{{ inseminacion.diagnostico.fecha|date:"d/m/Y" }}</span>
+{% elif inseminacion.estado_diagnostico == 'vencido' %}
+    <span class="repro-estado repro-estado--alert">Sin diagnóstico</span>
+    <span class="repro-estado__fecha">Vencido · día {{ inseminacion.dias_desde_servicio }}</span>
+{% else %}
+    <span class="repro-estado repro-estado--wait">En espera</span>
+    <span class="repro-estado__fecha">Faltan {{ inseminacion.dias_restantes_diagnostico }} d (día {{ inseminacion.dias_desde_servicio }})</span>
+{% endif %}

@@ -1,0 +1,175 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    {% if vista_pendientes %}
+    Servicios con más de {{ dias_diagnostico }} días sin confirmar preñez.
+    {% else %}
+    Ciclo reproductivo: servicio → diagnóstico → parto.
+    {% endif %}
+</p>
+
+{% if total_padrillos == 0 and vista_historial %}
+<div class="alert alert-success panel-hint">
+    <strong>Primer paso:</strong> registre padrillos en <a href="{% url 'inseminacion:padrillos' %}">Padrillos</a> antes de anotar inseminaciones artificiales.
+</div>
+{% endif %}
+
+{% if vista_pendientes and pendientes_diagnostico %}
+<div class="alert alert-warning panel-hint">
+    Hay <strong>{{ pendientes_diagnostico }}</strong> inseminación{{ pendientes_diagnostico|pluralize:"es" }} que superaron los {{ dias_diagnostico }} días sin diagnóstico.
+</div>
+{% endif %}
+
+{% include 'panel/inseminacion/_flujo_reproductivo.html' %}
+{% include 'panel/inseminacion/_tabs.html' %}
+
+<div class="kpi-grid kpi-grid--compact kpi-grid--repro">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ page_obj.paginator.count }}</div>
+        <div class="kpi-label">Resultados</div>
+    </div>
+    {% if vista_historial %}
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ inseminaciones_mes }}</div>
+        <div class="kpi-label">Este mes</div>
+    </div>
+    {% endif %}
+    {% if pendientes_diagnostico %}
+    <a href="?vista=pendientes" class="kpi-card danger">
+        <div class="kpi-value">{{ pendientes_diagnostico }}</div>
+        <div class="kpi-label">Sin diagnóstico</div>
+    </a>
+    {% elif vista_historial %}
+    <div class="kpi-card">
+        <div class="kpi-value">0</div>
+        <div class="kpi-label">Sin diagnóstico</div>
+    </div>
+    {% endif %}
+    {% if preñadas_activas %}
+    <a href="?resultado=preñadas" class="kpi-card warning">
+        <div class="kpi-value">{{ preñadas_activas }}</div>
+        <div class="kpi-label">Preñadas activas</div>
+    </a>
+    {% endif %}
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>{% if vista_pendientes %}Pendientes de diagnóstico{% else %}Historial de inseminaciones{% endif %}</h2>
+        <div class="btn-group">
+            <a href="{% url 'inseminacion:crear' %}" class="btn-sm btn-panel">+ Inseminación</a>
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form filtros-form--inline">
+            {% if vista_pendientes %}<input type="hidden" name="vista" value="pendientes">{% endif %}
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Cerda o padrillo…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-tipo">Tipo</label>
+                <select name="tipo" id="f-tipo" class="filtro-input">
+                    <option value="">Todos</option>
+                    <option value="natural" {% if tipo == 'natural' %}selected{% endif %}>Natural</option>
+                    <option value="artificial" {% if tipo == 'artificial' %}selected{% endif %}>Artificial</option>
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-padrillo">Padrillo</label>
+                <select name="padrillo" id="f-padrillo" class="filtro-input">
+                    <option value="">Todos</option>
+                    {% for p in padrillos_cat %}
+                    <option value="{{ p.pk }}" {% if padrillo_id == p.pk|stringformat:'i' %}selected{% endif %}>{{ p.codigo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if vista_historial %}
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-resultado">Diagnóstico</label>
+                <select name="resultado" id="f-resultado" class="filtro-input">
+                    <option value="">Todos</option>
+                    <option value="sin" {% if resultado == 'sin' %}selected{% endif %}>Sin diagnóstico</option>
+                    <option value="preñadas" {% if resultado == 'preñadas' %}selected{% endif %}>Preñadas (sin parto)</option>
+                    <option value="positivo" {% if resultado == 'positivo' %}selected{% endif %}>Positivo</option>
+                    <option value="negativo" {% if resultado == 'negativo' %}selected{% endif %}>Negativo</option>
+                    <option value="dudoso" {% if resultado == 'dudoso' %}selected{% endif %}>Dudoso</option>
+                </select>
+            </div>
+            {% endif %}
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-desde">Desde</label>
+                <input type="date" name="desde" id="f-desde" value="{{ desde }}" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-hasta">Hasta</label>
+                <input type="date" name="hasta" id="f-hasta" value="{{ hasta }}" class="filtro-input">
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% if vista_pendientes %}?vista=pendientes{% else %}{% url 'inseminacion:index' %}{% endif %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="panel-table panel-table--repro">
+        <thead><tr>
+            <th>Cerda</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Padrillo</th>
+            <th>Diagnóstico <span class="th-hint" title="Control recomendado a los 21 días del servicio. Usted registra el resultado (positivo, negativo o dudoso).">ⓘ</span></th>
+            <th>Parto <span class="th-hint" title="Estimado: fecha de inseminación + 114 días si el diagnóstico fue positivo. Al parir, registre el parto real.">ⓘ</span></th>
+            <th class="col-hide-sm">Registró</th>
+            <th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for i in inseminaciones %}
+            <tr class="{% if i.estado_diagnostico == 'vencido' %}repro-row--pendiente{% elif i.pendiente_parto %}repro-row--preñada{% endif %}">
+                <td>{% include 'panel/inseminacion/_celda_cerda.html' with cerda=i.cerda %}</td>
+                <td>{{ i.fecha|date:"d/m/Y" }}</td>
+                <td>
+                    <span class="repro-tipo repro-tipo--{{ i.tipo }}">{{ i.get_tipo_display }}</span>
+                </td>
+                <td>{% if i.padrillo %}<strong>{{ i.padrillo.codigo }}</strong>{% else %}<span class="text-muted-sm">—</span>{% endif %}</td>
+                <td>{% include 'panel/inseminacion/_badge_diagnostico.html' with inseminacion=i %}</td>
+                <td>{% include 'panel/inseminacion/_celda_parto.html' with inseminacion=i %}</td>
+                <td class="col-hide-sm"><span class="text-muted-sm">{{ i.responsable.username }}</span></td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        {% if i.puede_registrar_diagnostico %}
+                        <a href="{% url 'inseminacion:diagnostico' i.pk %}" class="btn-sm {% if i.estado_diagnostico == 'vencido' %}btn-danger{% else %}btn-panel{% endif %}"{% if i.estado_diagnostico == 'vencido' %} title="Superó los {{ dias_diagnostico }} días recomendados"{% endif %}>Diagnóstico</a>
+                        {% endif %}
+                        <a href="{% url 'inseminacion:editar' i.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    </span>
+                    {% if es_admin %}
+                    <span class="acciones-cerdo__sep" aria-hidden="true"></span>
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'inseminacion:eliminar' i.pk %}" class="btn-sm btn-outline-danger">Eliminar</a>
+                    </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="table-empty">
+                {% if vista_pendientes %}No hay inseminaciones pendientes de diagnóstico.{% else %}Sin inseminaciones registradas.{% endif %}
+            </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="paginacion">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">← Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

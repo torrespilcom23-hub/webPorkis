@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contacto — Granja Porkis{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contacto.css' %}?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>Contacto</h1>
+        <p>Estamos listos para atender sus consultas</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container contact-grid">
+        <div class="contact-info fade-in">
+            <h2>Hablemos</h2>
+            <p>Complete el formulario o contáctenos directamente. Responderemos en un plazo máximo de 24 horas.</p>
+
+            <ul class="contact-details">
+                <li>
+                    <span class="contact-icon">📍</span>
+                    <div>
+                        <strong>Dirección</strong>
+                        <p>Distrito de Santa, Provincia del Santa<br>Ancash — Perú</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon">📞</span>
+                    <div>
+                        <strong>Teléfono</strong>
+                        <p>+51 904 013 194</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon">✉️</span>
+                    <div>
+                        <strong>Email</strong>
+                        <p>aalcantarar@pj.gob.pe</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon">🕐</span>
+                    <div>
+                        <strong>Horario</strong>
+                        <p>Lunes a Sábado<br>7:00 AM – 5:00 PM</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="contact-form-wrap fade-in">
+            <form method="post" class="contact-form" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="form-error">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <span class="field-error">{{ field.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary btn-full">Enviar mensaje</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light map-section">
+    <div class="container fade-in">
+        <h2 class="section-title" style="text-align:center; margin-bottom:1.5rem;">Ubicación</h2>
+        <div class="map-wrap">
+            <iframe src="{{ maps_embed_url }}" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Ubicación Granja Porkis"></iframe>
+        </div>
+    </div>
+</section>
+{% endblock %}

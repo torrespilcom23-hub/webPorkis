@@ -1,0 +1,56 @@
+<div class="form-grid-compact catalog-form-grid catalog-form-grid--lechones">
+    <div class="form-row">
+        <label for="{{ prefix }}raza">{{ form.raza.label }}</label>
+        {{ form.raza }}
+        {% if form.raza.errors %}<span class="field-error">{{ form.raza.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-row">
+        <label for="{{ prefix }}categoria">{{ form.categoria.label }}</label>
+        {{ form.categoria }}
+        {% if form.categoria.errors %}<span class="field-error">{{ form.categoria.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-row form-row--full" id="row-raza-otro-{{ form_id }}"{% if form.raza.value != 'otro' %} style="display:none"{% endif %}>
+        <label for="{{ prefix }}raza_otro">{{ form.raza_otro.label }}</label>
+        {{ form.raza_otro }}
+        {% if form.raza_otro.errors %}<span class="field-error">{{ form.raza_otro.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-row">
+        <label for="{{ prefix }}corral">{{ form.corral.label }}</label>
+        {{ form.corral }}
+        {% if form.corral.errors %}<span class="field-error">{{ form.corral.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-row" id="row-lote-{{ form_id }}"{% if form.crear_lote_camada.value %} style="display:none"{% endif %}>
+        <label for="{{ prefix }}lote">{{ form.lote.label }}</label>
+        {{ form.lote }}
+        <small class="field-hint">Vacío = lote de la madre (si no crea camada).</small>
+        {% if form.lote.errors %}<span class="field-error">{{ form.lote.errors.0 }}</span>{% endif %}
+    </div>
+    <div class="form-row form-row--camada">
+        <label class="lechones-camada-check" for="{{ prefix }}crear_lote_camada">
+            {{ form.crear_lote_camada }}
+            <span>{{ form.crear_lote_camada.label }}</span>
+        </label>
+        {% if form.crear_lote_camada.errors %}<span class="field-error">{{ form.crear_lote_camada.errors.0 }}</span>{% endif %}
+    </div>
+</div>
+<script>
+(function () {
+    const raza = document.getElementById('{{ prefix }}raza');
+    const rowOtro = document.getElementById('row-raza-otro-{{ form_id }}');
+    const rowLote = document.getElementById('row-lote-{{ form_id }}');
+    const chkCamada = document.getElementById('{{ prefix }}crear_lote_camada');
+    if (!raza || !rowOtro) return;
+    function toggleRazaOtro() {
+        rowOtro.style.display = raza.value === 'otro' ? '' : 'none';
+    }
+    function toggleLote() {
+        if (rowLote && chkCamada) {
+            rowLote.style.display = chkCamada.checked ? 'none' : '';
+        }
+    }
+    raza.addEventListener('change', toggleRazaOtro);
+    if (chkCamada) chkCamada.addEventListener('change', toggleLote);
+    toggleRazaOtro();
+    toggleLote();
+})();
+</script>

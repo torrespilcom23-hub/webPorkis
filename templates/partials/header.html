@@ -1,0 +1,17 @@
+{% load static %}
+<header class="site-header" id="site-header">
+    <div class="container header-inner">
+        <a href="{% url 'publico:inicio' %}" class="logo">
+            <span class="logo-icon">🐷</span>
+            <span class="logo-text">Granja <strong>Porkis</strong></span>
+        </a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="main-nav" id="main-nav">
+            <a href="{% url 'publico:inicio' %}" {% if request.resolver_match.url_name == 'inicio' %}class="active"{% endif %}>Inicio</a>
+            <a href="{% url 'publico:servicios' %}" {% if request.resolver_match.url_name == 'servicios' %}class="active"{% endif %}>Servicios</a>
+            <a href="{% url 'publico:contacto' %}" {% if request.resolver_match.url_name == 'contacto' %}class="active"{% endif %}>Contacto</a>
+        </nav>
+    </div>
+</header>

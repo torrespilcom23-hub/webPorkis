@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión — Porkis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}?v={{ static_version }}">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-box">
+            <h1>🐷 Granja Porkis</h1>
+            <p class="subtitle">Panel de administración</p>
+            {% if form.errors %}
+            <div class="alert alert-error">Usuario o contraseña incorrectos.</div>
+            {% endif %}
+            <form method="post" class="panel-form" style="box-shadow:none; padding:0; max-width:none;">
+                {% csrf_token %}
+                <div class="form-row">
+                    <label for="id_username">Usuario</label>
+                    <input type="text" name="username" id="id_username" required autofocus>
+                </div>
+                <div class="form-row">
+                    <label for="id_password">Contraseña</label>
+                    <input type="password" name="password" id="id_password" required>
+                </div>
+                <button type="submit" class="btn-panel">Ingresar</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

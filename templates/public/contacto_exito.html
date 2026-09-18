@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Mensaje enviado — Granja Porkis{% endblock %}
+
+{% block content %}
+<section class="section" style="min-height: 60vh; display:flex; align-items:center;">
+    <div class="container" style="text-align:center; max-width: 560px;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+        <h1 class="section-title">¡Mensaje enviado!</h1>
+        <p class="section-subtitle" style="margin: 0 auto 2rem;">Gracias por contactarnos. Nos comunicaremos con usted pronto.</p>
+        <a href="{% url 'publico:inicio' %}" class="btn btn-primary">Volver al inicio</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% if collapsible %}
+<details class="repro-help">
+    <summary>Guía del flujo reproductivo</summary>
+    {% include 'panel/inseminacion/_pipeline.html' %}
+</details>
+{% else %}
+{% include 'panel/inseminacion/_pipeline.html' %}
+{% endif %}

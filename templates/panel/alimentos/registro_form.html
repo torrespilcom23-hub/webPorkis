@@ -1,0 +1,62 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}{{ titulo }}{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Registre cuánto alimento se sirvió al lote. La fecha no puede ser futura.
+</p>
+
+{% if plan_sugerido %}
+<div class="alert alert-info panel-hint refuerzo-info">
+    Ración del lote <strong>{{ plan_sugerido.lote.nombre }}</strong>:
+    <strong>{{ plan_sugerido.cantidad_diaria_kg }} kg/día</strong> de {{ plan_sugerido.tipo_alimento.nombre }}
+    ({{ plan_sugerido.get_etapa_display }}). Ajuste si hoy se sirvió distinto.
+</div>
+{% endif %}
+
+<div class="panel-table-wrap catalog-form-wrap">
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <div class="form-grid-compact catalog-form-grid catalog-form-grid--registro">
+            <div class="form-row form-row--fecha">
+                <label for="{{ form.fecha.id_for_label }}">{{ form.fecha.label }}</label>
+                {{ form.fecha }}
+                <small class="field-hint">Hoy: {{ hoy|date:"d/m/Y" }}. Use la fecha real del servicio.</small>
+                {% if form.fecha.errors %}<span class="field-error">{{ form.fecha.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label for="{{ form.lote.id_for_label }}">{{ form.lote.label }}</label>
+                {{ form.lote }}
+                {% if form.lote.errors %}<span class="field-error">{{ form.lote.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label for="{{ form.tipo_alimento.id_for_label }}">{{ form.tipo_alimento.label }}</label>
+                {{ form.tipo_alimento }}
+                {% if form.tipo_alimento.errors %}<span class="field-error">{{ form.tipo_alimento.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--intervalo">
+                <label for="{{ form.cantidad_servida_kg.id_for_label }}">{{ form.cantidad_servida_kg.label }} (kg)</label>
+                {{ form.cantidad_servida_kg }}
+                {% if form.cantidad_servida_kg.errors %}<span class="field-error">{{ form.cantidad_servida_kg.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--intervalo">
+                <label for="{{ form.cantidad_sobrante_kg.id_for_label }}">{{ form.cantidad_sobrante_kg.label }} (kg) <span class="label-opt">opcional</span></label>
+                {{ form.cantidad_sobrante_kg }}
+                {% if form.cantidad_sobrante_kg.errors %}<span class="field-error">{{ form.cantidad_sobrante_kg.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--indicaciones">
+                <label for="{{ form.observaciones.id_for_label }}">{{ form.observaciones.label }} <span class="label-opt">opcional</span></label>
+                {{ form.observaciones }}
+            </div>
+        </div>
+
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Guardar consumo</button>
+            <a href="{% url cancel_url|default:'alimentos:index' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Dar de alta lechones del parto de <strong>{{ parto.madre.arete }}</strong> ({{ parto.fecha|date:"d/m/Y" }}) en Registro.
+</p>
+
+{% include 'panel/inseminacion/_tabs.html' %}
+
+<div class="alert alert-info panel-hint">
+    <strong>{{ parto.lechones_vivos }}</strong> nacidos vivos ·
+    <strong>{{ parto.lechones_en_registro }}</strong> ya en Registro ·
+    <strong>{{ parto.lechones_pendientes_alta }}</strong> pendientes de alta.
+</div>
+
+{% if parto.lechones_registrados.exists %}
+<div class="panel-table-wrap" style="margin-bottom:1.25rem;">
+    <div class="panel-table-header"><h2>Lechones ya registrados</h2></div>
+    <table class="panel-table">
+        <thead><tr><th>Arete</th><th>Sexo</th><th>Categoría</th><th>Corral</th></tr></thead>
+        <tbody>
+            {% for c in parto.lechones_registrados.all %}
+            <tr>
+                <td><a href="{% url 'registro:cerdo_detalle' c.pk %}"><strong>{{ c.arete }}</strong></a></td>
+                <td>{{ c.get_sexo_display }}</td>
+                <td>{{ c.categoria|default:"—" }}</td>
+                <td>{{ c.corral|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="repro-alta-grid">
+    <a href="{% url 'inseminacion:parto_lechones_rapido' parto.pk %}" class="repro-alta-card">
+        <h3>Alta rápida (camada)</h3>
+        <p>Registre varios lechones a la vez con reparto machos/hembras, raza, lote y corral comunes.</p>
+        <span class="btn-sm btn-panel">Usar alta rápida</span>
+    </a>
+    <a href="{% url 'inseminacion:parto_lechones_detallado' parto.pk %}" class="repro-alta-card">
+        <h3>Alta detallada</h3>
+        <p>Una fila por lechón: sexo, peso al nacer y observaciones individuales.</p>
+        <span class="btn-sm btn-secondary">Usar alta detallada</span>
+    </a>
+</div>
+
+<p style="margin-top:1rem;">
+    <a href="{% url 'inseminacion:partos' %}" class="btn-sm btn-secondary">Volver a partos</a>
+</p>
+{% endblock %}

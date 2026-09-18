@@ -1,0 +1,105 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Raciones por lote{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Cuántos <strong>kg/día</strong> debe recibir cada lote según el alimento y la etapa. El lote es el mismo grupo que creó en <a href="{% url 'registro:lotes' %}">Registro → Lotes</a>.
+</p>
+
+{% if total_tipos == 0 %}
+<div class="alert alert-success panel-hint">
+    Primero agregue alimentos en el <a href="{% url 'alimentos:catalogo' %}">Catálogo</a>.
+    Necesita al menos un <a href="{% url 'registro:lotes' %}">lote</a> en Registro para asignar raciones.
+</div>
+{% else %}
+<div class="alert alert-info panel-hint catalog-hint">
+    <ul class="catalog-hint__list">
+        <li>La <strong>ración</strong> es la meta diaria (kg/día) para un lote concreto — no es otro grupo de cerdos.</li>
+        <li>Al pulsar <strong>Consumo</strong> en una fila, se prellenan lote, alimento y kg según esta ración.</li>
+        <li>Lo anotado en la pestaña <a href="{% url 'alimentos:index' %}">Consumo</a> es lo realmente servido (puede diferir).</li>
+    </ul>
+</div>
+{% endif %}
+
+{% include 'panel/alimentos/_tabs.html' %}
+
+<div class="kpi-grid kpi-grid--compact">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ planes|length }}</div>
+        <div class="kpi-label">{% if ver_todos %}Raciones{% else %}Raciones activas{% endif %}</div>
+    </div>
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ total_planes_activos }}</div>
+        <div class="kpi-label">Activas en total</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value">{{ total_tipos }}</div>
+        <div class="kpi-label">Tipos en catálogo</div>
+    </div>
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>{% if ver_todos %}Todas las raciones{% else %}Raciones activas{% endif %}</h2>
+        <div class="btn-group">
+            <a href="{% url 'alimentos:plan_crear' %}" class="btn-sm btn-panel">+ Nueva ración</a>
+            <a href="{% url 'registro:lotes' %}" class="btn-sm btn-secondary">Gestionar lotes</a>
+            {% if ver_todos %}
+            <a href="{% url 'alimentos:planes' %}" class="btn-sm btn-secondary">Solo activas</a>
+            {% else %}
+            <a href="?ver=todos" class="btn-sm btn-secondary">Ver inactivas</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form filtros-form--inline">
+            {% if ver_todos %}<input type="hidden" name="ver" value="todos">{% endif %}
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar lote</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Nombre del lote…" class="filtro-input">
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% if ver_todos %}?ver=todos{% else %}{% url 'alimentos:planes' %}{% endif %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="panel-table">
+        <thead><tr>
+            <th>Lote <span class="th-hint" title="Grupo de cerdos (Registro → Lotes)">ⓘ</span></th>
+            <th>Alimento</th><th>kg/día</th><th>Etapa</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for p in planes %}
+            <tr>
+                <td>
+                    <a href="{% url 'registro:lote_editar' p.lote.pk %}" title="Editar lote en Registro"><strong>{{ p.lote.nombre }}</strong></a>
+                </td>
+                <td>{{ p.tipo_alimento.nombre }}</td>
+                <td><span class="badge badge-info">{{ p.cantidad_diaria_kg }} kg</span></td>
+                <td>{{ p.get_etapa_display }}</td>
+                <td>
+                    {% if p.activo %}
+                    <span class="badge badge-success">Activa</span>
+                    {% else %}
+                    <span class="badge badge-warning">Inactiva</span>
+                    {% endif %}
+                </td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        {% if p.activo %}
+                        <a href="{% url 'alimentos:registro_crear' %}?plan={{ p.pk }}" class="btn-sm btn-panel" title="Registrar consumo con datos de la ración">Consumo</a>
+                        {% endif %}
+                        <a href="{% url 'alimentos:plan_editar' p.pk %}" class="btn-sm btn-secondary">Editar</a>
+                        <a href="{% url 'alimentos:plan_eliminar' p.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="table-empty">No hay raciones{% if not ver_todos %} activas{% endif %}. <a href="{% url 'registro:lotes' %}">Cree un lote</a> y luego una ración.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

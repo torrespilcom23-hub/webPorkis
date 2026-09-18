@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio — Granja Porkis{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content fade-in">
+        <span class="hero-badge">🌿 Producción porcina sostenible</span>
+        <h1>Calidad y tradición en cada cerdo</h1>
+        <p>Más de 5 años criando cerdos con los más altos estándares de bioseguridad, bienestar animal y excelencia genética.</p>
+        <div class="hero-actions">
+            <a href="{% url 'publico:servicios' %}" class="btn btn-primary">Conoce nuestros servicios</a>
+            <a href="{% url 'publico:contacto' %}" class="btn btn-outline">Contáctanos</a>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="nosotros">
+    <div class="container about-grid">
+        <div class="about-image fade-in">
+            <div class="about-image-placeholder">
+                <span>🐷</span>
+                <p>Instalaciones modernas</p>
+            </div>
+        </div>
+        <div class="about-text fade-in">
+            <h2 class="section-title">Sobre nosotros</h2>
+            <p>Granja Porkis nació con la visión de ser referente en producción porcina en la región. Combinamos técnicas tradicionales con tecnología de punta para garantizar cerdos sanos y de alta calidad.</p>
+            <div class="values-grid">
+                <div class="value-item">
+                    <strong>Misión</strong>
+                    <p>Producir cerdos de excelente calidad con prácticas sostenibles y responsables.</p>
+                </div>
+                <div class="value-item">
+                    <strong>Visión</strong>
+                    <p>Ser la granja porcina líder en innovación y confianza del mercado nacional.</p>
+                </div>
+                <div class="value-item">
+                    <strong>Valores</strong>
+                    <p>Integridad, bioseguridad, bienestar animal y compromiso con nuestros clientes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light" id="cifras">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Nuestra granja en cifras</h2>
+            <p class="section-subtitle">Resultados que respaldan nuestra experiencia</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card fade-in">
+                <span class="stat-number" data-target="{{ cifras.cerdos_activos }}">0</span>
+                <span class="stat-label">Cerdos en granja</span>
+            </div>
+            <div class="stat-card fade-in">
+                <span class="stat-number" data-target="{{ cifras.lechones }}">0</span>
+                <span class="stat-label">Lechones</span>
+            </div>
+            <div class="stat-card fade-in">
+                <span class="stat-number" data-target="{{ cifras.lotes_activos }}">0</span>
+                <span class="stat-label">Lotes activos</span>
+            </div>
+            <div class="stat-card fade-in">
+                <span class="stat-number" data-target="{{ cifras.padrillos }}">0</span>
+                <span class="stat-label">Padrillos</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="galeria">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Galería</h2>
+            <p class="section-subtitle">Conoce nuestras instalaciones y procesos</p>
+        </div>
+        <div class="gallery-grid fade-in">
+            <div class="gallery-item gi-1"><span>Corrales</span></div>
+            <div class="gallery-item gi-2"><span>Alimentación</span></div>
+            <div class="gallery-item gi-3"><span>Genética</span></div>
+            <div class="gallery-item gi-4"><span>Bioseguridad</span></div>
+            <div class="gallery-item gi-5"><span>Lechones</span></div>
+            <div class="gallery-item gi-6"><span>Engorde</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light" id="testimonios">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+        </div>
+        <div class="testimonials-slider fade-in" id="testimonials">
+            <div class="testimonial active">
+                <blockquote>"Excelente calidad genética en los lechones. Llevamos 3 años trabajando con Porkis y los resultados en engorde son sobresalientes."</blockquote>
+                <cite>— Carlos Méndez, Productor agropecuario</cite>
+            </div>
+            <div class="testimonial">
+                <blockquote>"Su asesoría técnica nos ayudó a mejorar significativamente la conversión alimenticia en nuestra granja."</blockquote>
+                <cite>— Ana Rodríguez, Veterinaria</cite>
+            </div>
+            <div class="testimonial">
+                <blockquote>"Confiables, puntuales y con cerdos siempre sanos. Porkis es nuestro proveedor de confianza."</blockquote>
+                <cite>— Jorge López, Distribuidor</cite>
+            </div>
+            <div class="testimonial-dots" id="testimonial-dots"></div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="servicios-preview">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Nuestros servicios</h2>
+            <p class="section-subtitle">Soluciones integrales para la producción porcina</p>
+        </div>
+        <div class="services-preview-grid">
+            {% include 'public/_servicios_cards.html' with preview=True %}
+        </div>
+        <div style="text-align:center; margin-top:2rem;">
+            <a href="{% url 'publico:servicios' %}" class="btn btn-primary">Ver todos los servicios</a>
+        </div>
+    </div>
+</section>
+
+<section class="section cta-section bg-green">
+    <div class="container cta-content fade-in">
+        <h2>¿Listo para trabajar con nosotros?</h2>
+        <p>Contáctanos hoy y descubre cómo Granja Porkis puede impulsar tu producción porcina.</p>
+        <a href="{% url 'publico:contacto' %}" class="btn btn-earth">Escríbenos ahora</a>
+    </div>
+</section>
+{% endblock %}

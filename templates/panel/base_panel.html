@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block panel_title %}Panel{% endblock %} — Porkis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}?v={{ static_version }}">
+</head>
+<body class="panel-body">
+    <aside class="panel-sidebar">
+        <div class="panel-brand">
+            🐷 Granja Porkis
+            <span>Panel de control</span>
+        </div>
+        <nav class="panel-nav">
+            <a href="{% url 'panel:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+            <a href="{% url 'inventario:lista' %}" {% if 'inventario' in request.path %}class="active"{% endif %}>📦 Inventario</a>
+            <a href="{% url 'registro:cerdos' %}" {% if '/registro/' in request.path %}class="active"{% endif %}>🐖 Registro</a>
+            <a href="{% url 'vacunas:aplicaciones' %}" {% if '/vacunas/' in request.path %}class="active"{% endif %}>💉 Vacunas</a>
+            <a href="{% url 'alimentos:index' %}" {% if '/alimentos/' in request.path %}class="active"{% endif %}>🌾 Alimentos</a>
+            <a href="{% url 'inseminacion:index' %}" {% if '/inseminacion/' in request.path %}class="active"{% endif %}>🧬 Inseminación</a>
+            <a href="{% url 'reportes:index' %}" {% if '/reportes/' in request.path %}class="active"{% endif %}>📋 Reportes</a>
+            <a href="{% url 'panel:mensajes' %}" {% if '/mensajes/' in request.path %}class="active"{% endif %}>✉️ Mensajes{% if mensajes_sin_leer %} <span class="badge badge-warning" style="margin-left:auto;">{{ mensajes_sin_leer }}</span>{% endif %}</a>
+            <a href="{% url 'publico:inicio' %}" target="_blank">🌐 Ver sitio web</a>
+        </nav>
+    </aside>
+
+    <div class="panel-main">
+        <header class="panel-header">
+            <h1>{% block page_heading %}Dashboard{% endblock %}</h1>
+            <div class="panel-user">
+                <span class="user-name">👤 {{ request.user.get_full_name|default:request.user.username }}</span>
+                <a href="{% url 'panel:cambiar_password' %}" class="btn-sm btn-secondary">Cambiar contraseña</a>
+                <form method="post" action="{% url 'panel:logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-sm btn-danger">Cerrar sesión</button>
+                </form>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="panel-messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="panel-content">
+            {% block panel_content %}{% endblock %}
+        </div>
+    </div>
+
+    <div id="modal-confirm" class="modal-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-titulo">
+            <h3 id="modal-confirm-titulo">Confirmar acción</h3>
+            <p id="modal-confirm-mensaje"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-sm btn-secondary" id="modal-confirm-cancel">Cancelar</button>
+                <button type="button" class="btn-sm btn-danger" id="modal-confirm-ok">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var overlay = document.getElementById('modal-confirm');
+        var titulo = document.getElementById('modal-confirm-titulo');
+        var mensaje = document.getElementById('modal-confirm-mensaje');
+        var btnOk = document.getElementById('modal-confirm-ok');
+        var btnCancel = document.getElementById('modal-confirm-cancel');
+        var formPendiente = null;
+
+        function abrir(form) {
+            formPendiente = form;
+            titulo.textContent = form.dataset.confirmTitulo || 'Confirmar acción';
+            mensaje.textContent = form.dataset.confirm || '¿Está seguro?';
+            btnOk.textContent = form.dataset.confirmOk || 'Confirmar';
+            btnOk.className = 'btn-sm ' + (form.dataset.confirmClass || 'btn-danger');
+            overlay.hidden = false;
+            btnOk.focus();
+        }
+        function cerrar() {
+            overlay.hidden = true;
+            formPendiente = null;
+        }
+
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (form.dataset && form.dataset.confirm && !form.dataset.confirmed) {
+                e.preventDefault();
+                abrir(form);
+            }
+        });
+        btnOk.addEventListener('click', function () {
+            if (formPendiente) {
+                formPendiente.dataset.confirmed = '1';
+                formPendiente.submit();
+            }
+            cerrar();
+        });
+        btnCancel.addEventListener('click', cerrar);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) cerrar();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !overlay.hidden) cerrar();
+        });
+    })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

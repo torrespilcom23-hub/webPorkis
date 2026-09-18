@@ -1,0 +1,15 @@
+<nav class="stock-tabs" aria-label="Módulo alimentos">
+    <a href="{% url 'alimentos:index' %}{% if query %}?{{ query }}{% endif %}"
+       class="stock-tab{% if tab_activo == 'consumo' %} is-active{% endif %}">
+        Consumo <span class="stock-tab__count">{{ total_registros }}</span>
+    </a>
+    <a href="{% url 'alimentos:planes' %}"
+       class="stock-tab{% if tab_activo == 'planes' %} is-active{% endif %}"
+       title="Kg/día por lote (grupo de cerdos)">
+        Raciones <span class="stock-tab__count">{{ total_planes_activos }}</span>
+    </a>
+    <a href="{% url 'alimentos:catalogo' %}"
+       class="stock-tab{% if tab_activo == 'catalogo' %} is-active{% endif %}">
+        Catálogo <span class="stock-tab__count">{{ total_tipos }}</span>
+    </a>
+</nav>

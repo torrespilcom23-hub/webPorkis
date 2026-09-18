@@ -1,0 +1,31 @@
+<footer class="site-footer">
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <span class="logo-icon">🐷</span>
+            <h3>Granja Porkis</h3>
+            <p>Producción porcina de calidad con más de 5 años de experiencia en el sector agropecuario.</p>
+        </div>
+        <div>
+            <h4>Enlaces</h4>
+            <ul>
+                <li><a href="{% url 'publico:inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'publico:servicios' %}">Servicios</a></li>
+                <li><a href="{% url 'publico:contacto' %}">Contacto</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Contacto</h4>
+            <ul>
+                <li>📍 Santa, Chimbote, Ancash — Perú</li>
+                <li>📞 +51 904 013 194</li>
+                <li>✉️ aalcantarar@pj.gob.pe</li>
+                <li>🕐 Lun–Sáb 7:00 – 17:00</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <p>&copy; {% now "Y" %} Granja Porkis. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>

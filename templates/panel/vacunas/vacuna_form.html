@@ -1,0 +1,48 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}{{ titulo }}{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Defina la vacuna en el catálogo. El intervalo sirve para calcular la <strong>próxima dosis</strong>;
+    las indicaciones son notas internas para quien aplique.
+</p>
+
+<div class="panel-table-wrap catalog-form-wrap">
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <div class="form-grid-compact catalog-form-grid">
+            <div class="form-row form-row--nombre">
+                <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}<span class="field-error">{{ form.nombre.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--intervalo">
+                <label for="{{ form.intervalo_dias.id_for_label }}">
+                    {{ form.intervalo_dias.label }}
+                    <span class="label-opt">opcional</span>
+                </label>
+                {{ form.intervalo_dias }}
+                <small class="field-hint">{{ form.intervalo_dias.help_text }}</small>
+                {% if form.intervalo_dias.errors %}<span class="field-error">{{ form.intervalo_dias.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--indicaciones">
+                <label for="{{ form.descripcion.id_for_label }}">
+                    {{ form.descripcion.label }}
+                    <span class="label-opt">opcional</span>
+                </label>
+                {{ form.descripcion }}
+                <small class="field-hint">{{ form.descripcion.help_text }}</small>
+                {% if form.descripcion.errors %}<span class="field-error">{{ form.descripcion.errors.0 }}</span>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Guardar en catálogo</button>
+            <a href="{% url cancel_url|default:'vacunas:catalogo' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

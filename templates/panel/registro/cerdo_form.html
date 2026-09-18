@@ -1,0 +1,69 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}{{ titulo }}{% endblock %}
+{% block panel_content %}
+{% if form.instance.pk %}
+<div class="alert alert-success" style="max-width:640px; margin-bottom:1rem;">
+    Editando: <strong>{{ form.instance.arete }}</strong>{% if form.instance.nombre %} — {{ form.instance.nombre }}{% endif %}
+</div>
+{% else %}
+<div class="alert alert-success" style="max-width:640px; margin-bottom:1rem;">
+    ℹ️ El <strong>arete</strong> se generará automáticamente al guardar
+    (A-0001, A-0002...).
+</div>
+{% endif %}
+<form method="post" class="panel-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert" style="max-width:640px; margin-bottom:1rem; background:#fef2f2; color:#991b1b; border:1px solid #fecaca;">
+        ⚠️ {{ form.non_field_errors.0 }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+    <div class="form-row"
+         {% if field.name == 'raza_otro' %}id="row-raza-otro"{% endif %}
+         {% if field.name == 'fecha_salida' or field.name == 'precio_venta' %}data-salida="{{ field.name }}"{% endif %}>
+        <label for="{{ field.id_for_label }}">{{ field.label }}
+            {% if not field.field.required %}<small style="color:#9ca3af; font-weight:400;">(opcional)</small>{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}<small style="color:#6b7280; font-size:0.8rem;">{{ field.help_text }}</small>{% endif %}
+        {% if field.name == 'lote' %}
+        <small style="display:block; margin-top:0.2rem;">
+            <a href="{% url 'registro:lote_crear' %}" target="_blank" style="color:#166534;">
+                + Crear un lote nuevo</a> <span style="color:#9ca3af;">(se abre en otra pestaña; luego recarga este formulario)</span>
+        </small>
+        {% endif %}
+        {% if field.errors %}<span style="color:#dc2626;font-size:0.8rem;">{{ field.errors.0 }}</span>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="form-actions">
+        <button type="submit" class="btn-sm btn-panel">💾 Guardar</button>
+        <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-secondary">Cancelar</a>
+    </div>
+</form>
+<script>
+(function () {
+    // Muestra la caja de texto "¿Cuál raza?" solo cuando Raza = Otro
+    const raza = document.getElementById('id_raza');
+    const rowOtro = document.getElementById('row-raza-otro');
+    function toggleRazaOtro() {
+        rowOtro.style.display = raza.value === 'otro' ? '' : 'none';
+    }
+    raza.addEventListener('change', toggleRazaOtro);
+    toggleRazaOtro();
+
+    // Campos de salida: visibles solo si el cerdo ya no está en la granja.
+    // Precio de venta: solo si fue vendido.
+    const estado = document.getElementById('id_estado');
+    const rowFecha = document.querySelector('[data-salida="fecha_salida"]');
+    const rowPrecio = document.querySelector('[data-salida="precio_venta"]');
+    function toggleSalida() {
+        const fuera = estado.value !== 'activo';
+        rowFecha.style.display = fuera ? '' : 'none';
+        rowPrecio.style.display = estado.value === 'vendido' ? '' : 'none';
+    }
+    estado.addEventListener('change', toggleSalida);
+    toggleSalida();
+})();
+</script>
+{% endblock %}

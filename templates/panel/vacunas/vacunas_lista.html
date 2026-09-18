@@ -1,0 +1,64 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Catálogo de vacunas{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Lista maestra de vacunas de la granja. Aquí solo se define el nombre, el intervalo de refuerzo y las indicaciones de uso.
+</p>
+
+<div class="alert alert-info panel-hint catalog-hint">
+    <ul class="catalog-hint__list">
+        <li><strong>Intervalo</strong> — al registrar una aplicación, el sistema calcula la próxima dosis (ej. 21 días → refuerzo automático).</li>
+        <li><strong>Indicaciones</strong> — notas para el equipo: dosis habitual, vía, edad o criterio del veterinario. No cambian el cálculo.</li>
+    </ul>
+</div>
+
+{% include 'panel/vacunas/_tabs.html' %}
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Catálogo</h2>
+        <div class="btn-group">
+            <a href="{% url 'vacunas:vacuna_crear' %}" class="btn-sm btn-panel">+ Agregar vacuna al catálogo</a>
+        </div>
+    </div>
+    <table class="panel-table catalog-table">
+        <thead><tr>
+            <th>Nombre</th>
+            <th>Intervalo</th>
+            <th>Aplicaciones</th>
+            <th class="catalog-col-indicaciones">Indicaciones</th>
+            <th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for v in vacunas %}
+            <tr>
+                <td><strong>{{ v.nombre }}</strong></td>
+                <td>
+                    {% if v.intervalo_dias %}
+                    <span class="badge badge-info">{{ v.intervalo_dias }} días</span>
+                    {% else %}
+                    <span class="badge badge-warning">Manual</span>
+                    {% endif %}
+                </td>
+                <td><span class="badge">{{ v.num_aplicaciones }}</span></td>
+                <td class="catalog-indicaciones">
+                    {% if v.descripcion %}
+                    <p class="catalog-indicaciones__text" title="{{ v.descripcion }}">{{ v.descripcion|truncatechars:140 }}</p>
+                    {% else %}
+                    <span class="catalog-indicaciones--empty">Sin indicaciones</span>
+                    {% endif %}
+                </td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'vacunas:vacuna_editar' v.pk %}" class="btn-sm btn-secondary">Editar</a>
+                        <a href="{% url 'vacunas:vacuna_eliminar' v.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="table-empty">Sin vacunas en catálogo. Cree la primera para comenzar.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

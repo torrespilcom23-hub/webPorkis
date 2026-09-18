@@ -1,0 +1,64 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_heading %}Historial de movimientos{% endblock %}
+
+{% block panel_content %}
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Entradas y salidas</h2>
+        <div class="btn-group">
+            <a href="{% url 'inventario:lista' %}" class="btn-sm btn-secondary">← Productos</a>
+            <a href="{% url 'inventario:movimiento' %}" class="btn-sm btn-panel">+ Nuevo movimiento</a>
+        </div>
+    </div>
+
+    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
+        <form method="get" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Buscar producto o motivo..."
+                   style="padding:0.5rem 0.85rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:0.875rem; min-width:220px;">
+            <select name="tipo" style="padding:0.5rem 0.85rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:0.875rem;">
+                <option value="">Todos los tipos</option>
+                {% for valor, nombre in tipos %}
+                <option value="{{ valor }}" {% if tipo == valor %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+            <a href="{% url 'inventario:movimientos' %}" class="btn-sm btn-secondary">Limpiar</a>
+        </form>
+    </div>
+
+    <table class="panel-table">
+        <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th><th>Registrado por</th><th>Acciones</th></tr></thead>
+        <tbody>
+            {% for m in movimientos %}
+            <tr>
+                <td>{{ m.created_at|date:"d/m/Y H:i" }}</td>
+                <td><a href="{% url 'inventario:detalle' m.producto.pk %}">{{ m.producto.nombre }}</a></td>
+                <td>
+                    {% if m.tipo == 'entrada' %}<span class="badge badge-success">Entrada</span>
+                    {% else %}<span class="badge badge-warning">Salida</span>{% endif %}
+                </td>
+                <td>{{ m.cantidad }} {{ m.producto.unidad }}</td>
+                <td>{{ m.motivo|default:"—" }}</td>
+                <td>{{ m.registrado_por.username }}</td>
+                <td><a href="{% url 'inventario:movimiento_eliminar' m.pk %}" class="btn-sm btn-danger">Eliminar</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" style="text-align:center;color:#9ca3af;">Sin movimientos registrados</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

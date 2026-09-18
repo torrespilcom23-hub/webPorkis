@@ -1,0 +1,17 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_heading %}Confirmar eliminación{% endblock %}
+
+{% block panel_content %}
+<div class="panel-form">
+    <p>¿Está seguro de eliminar <strong>{{ objeto }}</strong>?</p>
+    {% if nota %}
+    <p style="margin-top:0.75rem; color:#92400e; background:#fef3c7; padding:0.75rem 1rem; border-radius:8px; font-size:0.875rem;">⚠️ {{ nota }}</p>
+    {% endif %}
+    <form method="post" class="form-actions" style="margin-top:1.5rem;">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-danger">Sí, eliminar</button>
+        <a href="{% if cancel_href %}{{ cancel_href }}{% else %}{% url volver %}{% endif %}" class="btn-sm btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

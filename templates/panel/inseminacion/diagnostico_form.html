@@ -1,0 +1,29 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Diagnóstico de preñez — cerda <strong>{{ inseminacion.cerda.arete }}</strong>, servicio del {{ inseminacion.fecha|date:"d/m/Y" }} (día {{ inseminacion.dias_desde_servicio }}).
+</p>
+
+<div class="panel-table-wrap catalog-form-wrap repro-form-wrap">
+    <div class="repro-form-head"><h2>Registrar diagnóstico</h2></div>
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+        {% for field in form %}
+        <div class="form-row">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small class="field-hint">{{ field.help_text }}</small>{% endif %}
+            {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Guardar diagnóstico</button>
+            <a href="{% url cancel_url|default:'inseminacion:index' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

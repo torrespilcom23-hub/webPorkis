@@ -1,0 +1,18 @@
+<nav class="stock-tabs" aria-label="Módulo vacunas">
+    <a href="{% url 'vacunas:aplicaciones' %}{% if query_tabs %}?{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if tab_activo == 'historial' %} is-active{% endif %}">
+        Aplicaciones <span class="stock-tab__count">{{ total_aplicaciones }}</span>
+    </a>
+    <a href="?vista=vencidas{% if query_tabs %}&{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if tab_activo == 'vencidas' %} is-active{% endif %}">
+        Vencidas <span class="stock-tab__count">{{ vencidas }}</span>
+    </a>
+    <a href="?vista=proximas{% if query_tabs %}&{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if tab_activo == 'proximas' %} is-active{% endif %}">
+        Próximas 7 días <span class="stock-tab__count">{{ proximas_7d }}</span>
+    </a>
+    <a href="{% url 'vacunas:catalogo' %}"
+       class="stock-tab{% if tab_activo == 'catalogo' %} is-active{% endif %}">
+        Catálogo <span class="stock-tab__count">{{ total_catalogo }}</span>
+    </a>
+</nav>

@@ -1,0 +1,77 @@
+<div id="modal-peso" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mp-titulo">
+        <h3 id="mp-titulo">Registrar peso</h3>
+        <p id="mp-texto"></p>
+        <form id="mp-form" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="mp-fecha">Fecha del pesaje</label>
+                <input type="date" name="fecha" id="mp-fecha" required>
+            </div>
+            <p id="mp-peso-ref" class="modal-peso-ref" hidden></p>
+            <div class="form-group">
+                <label for="mp-peso">Peso (kg)</label>
+                <input type="number" name="peso_kg" id="mp-peso" step="0.01" min="0" placeholder="0.00" inputmode="decimal" required>
+            </div>
+            <div class="form-group">
+                <label for="mp-obs">Observaciones <span style="font-weight:400;color:#6b7280;">— opcional</span></label>
+                <input type="text" name="observaciones" id="mp-obs" maxlength="200" placeholder="">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-sm btn-secondary" id="mp-cancel">Cancelar</button>
+                <button type="submit" class="btn-sm btn-panel" id="mp-ok">Guardar pesaje</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var overlay = document.getElementById('modal-peso');
+    if (!overlay) return;
+    var form = document.getElementById('mp-form');
+    var titulo = document.getElementById('mp-titulo');
+    var texto = document.getElementById('mp-texto');
+    var fecha = document.getElementById('mp-fecha');
+    var peso = document.getElementById('mp-peso');
+    var pesoRef = document.getElementById('mp-peso-ref');
+    var btnCancel = document.getElementById('mp-cancel');
+
+    function hoyLocal() {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function abrir(btn) {
+        var anterior = btn.dataset.pesoAnterior;
+        form.action = btn.dataset.url;
+        titulo.textContent = 'Registrar peso';
+        texto.textContent = 'Cerdo ' + btn.dataset.arete + '.';
+        if (anterior) {
+            pesoRef.textContent = 'Peso anterior: ' + anterior + ' kg';
+            pesoRef.hidden = false;
+            peso.placeholder = anterior + ' (anterior)';
+        } else {
+            pesoRef.textContent = 'Sin pesaje previo registrado.';
+            pesoRef.hidden = false;
+            peso.placeholder = '0.00';
+        }
+        fecha.value = hoyLocal();
+        fecha.max = hoyLocal();
+        peso.value = '';
+        document.getElementById('mp-obs').value = '';
+        overlay.hidden = false;
+        peso.focus();
+    }
+    function cerrar() { overlay.hidden = true; }
+
+    document.querySelectorAll('[data-modal-peso]').forEach(function (btn) {
+        btn.addEventListener('click', function () { abrir(btn); });
+    });
+    btnCancel.addEventListener('click', cerrar);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrar(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !overlay.hidden) cerrar();
+    });
+})();
+</script>

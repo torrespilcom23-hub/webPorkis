@@ -1,0 +1,84 @@
+<div id="modal-estado" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="me-titulo">
+        <h3 id="me-titulo"></h3>
+        <p id="me-texto"></p>
+        <form id="me-form" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="estado" id="me-estado">
+            <div class="form-group">
+                <label for="me-fecha" id="me-fecha-label"></label>
+                <input type="date" name="fecha_salida" id="me-fecha" required>
+            </div>
+            <div class="form-group" id="me-precio-wrap">
+                <label for="me-precio">Precio de venta (S/.) <span style="font-weight:400;color:#6b7280;">— opcional, sirve para reportes</span></label>
+                <input type="number" name="precio_venta" id="me-precio" step="0.01" min="0" placeholder="0.00" inputmode="decimal">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-sm btn-secondary" id="me-cancel">Cancelar</button>
+                <button type="submit" class="btn-sm" id="me-ok">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var overlay = document.getElementById('modal-estado');
+    if (!overlay) return;
+    var form = document.getElementById('me-form');
+    var titulo = document.getElementById('me-titulo');
+    var texto = document.getElementById('me-texto');
+    var estado = document.getElementById('me-estado');
+    var fechaLabel = document.getElementById('me-fecha-label');
+    var fecha = document.getElementById('me-fecha');
+    var precioWrap = document.getElementById('me-precio-wrap');
+    var precio = document.getElementById('me-precio');
+    var btnOk = document.getElementById('me-ok');
+    var btnCancel = document.getElementById('me-cancel');
+
+    function hoyLocal() {
+        var d = new Date();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var dia = String(d.getDate()).padStart(2, '0');
+        return d.getFullYear() + '-' + m + '-' + dia;
+    }
+
+    function abrir(btn) {
+        var tipo = btn.dataset.modalEstado;
+        var arete = btn.dataset.arete;
+        form.action = btn.dataset.url;
+        estado.value = tipo;
+        fecha.value = hoyLocal();
+        fecha.max = hoyLocal();
+        if (tipo === 'vendido') {
+            titulo.textContent = 'Marcar como vendido';
+            texto.textContent = 'El cerdo ' + arete + ' saldrá del stock de la granja y quedará registrado para reportes de ventas.';
+            fechaLabel.textContent = 'Fecha de venta';
+            precioWrap.style.display = '';
+            precio.value = '';
+            btnOk.className = 'btn-sm btn-success';
+            btnOk.textContent = 'Confirmar venta';
+        } else {
+            titulo.textContent = 'Registrar fallecimiento';
+            texto.textContent = 'El cerdo ' + arete + ' saldrá del stock de la granja y quedará registrado como baja.';
+            fechaLabel.textContent = 'Fecha de fallecimiento';
+            precioWrap.style.display = 'none';
+            precio.value = '';
+            btnOk.className = 'btn-sm btn-danger';
+            btnOk.textContent = 'Confirmar baja';
+        }
+        overlay.hidden = false;
+        fecha.focus();
+    }
+    function cerrar() { overlay.hidden = true; }
+
+    document.querySelectorAll('[data-modal-estado]').forEach(function (btn) {
+        btn.addEventListener('click', function () { abrir(btn); });
+    });
+    btnCancel.addEventListener('click', cerrar);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrar(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !overlay.hidden) cerrar();
+    });
+})();
+</script>

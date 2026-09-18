@@ -1,0 +1,140 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Reportes{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    <a href="{% url 'reportes:index' %}" class="text-muted-sm">Reportes</a>
+    · {{ meta.nombre }}
+</p>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <div>
+            <h2>{{ titulo }}</h2>
+            <p class="reporte-ver-desc">{{ meta.descripcion }}</p>
+        </div>
+        <div class="btn-group">
+            {% if total_filas %}
+            <a href="{% url 'reportes:exportar' tipo 'pdf' %}?{{ query_string }}" class="btn-sm btn-export btn-export--pdf" target="_blank" rel="noopener">
+                <svg class="btn-export__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM8 12h1.5v6H8v-6zm3.2 0H13c.9 0 1.5.5 1.5 1.4v.2c0 .5-.2.9-.6 1.1.5.2.8.7.8 1.3v.2c0 1-.7 1.6-1.8 1.6h-1.9v-5.8zm1.5 2.3v1.2h.6c.4 0 .6-.2.6-.5v-.2c0-.3-.2-.5-.6-.5h-.6zm0 2.6v1.4h.7c.5 0 .8-.2.8-.6v-.2c0-.4-.3-.6-.8-.6h-.7zM15 12h3.2c1.1 0 1.8.6 1.8 1.5S19.3 15 18.2 15H17v3h-1.5v-6zm1.5 1.5h.9c.4 0 .6-.2.6-.5s-.2-.5-.6-.5h-.9v1z"/>
+                </svg>
+                PDF
+            </a>
+            <a href="{% url 'reportes:exportar' tipo 'xlsx' %}?{{ query_string }}" class="btn-sm btn-export btn-export--excel">
+                <svg class="btn-export__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM7.8 12.2h1.6l1.1 3.1 1.1-3.1h1.6l-1.9 5.1 1.2 3.2h-1.6l-.7-2.1-.7 2.1H7.8l1.2-3.2-1.9-5.1zm7.1 0h3.4v1.4h-1.9v1.2h1.8v1.3h-1.8v1.5h2v1.4h-3.5v-6.8z"/>
+                </svg>
+                Excel
+            </a>
+            {% endif %}
+            <a href="{% url 'reportes:index' %}" class="btn-sm btn-secondary">← Volver</a>
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form{% if tipo == 'alimentacion' or tipo == 'reproductivo' %} filtros-form--inline{% endif %}">
+            {% if tipo == 'inventario' %}
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-categoria">Categoría</label>
+                <select name="categoria" id="f-categoria" class="filtro-input">
+                    <option value="">Todas</option>
+                    {% for valor, nombre in categorias %}
+                    <option value="{{ valor }}" {% if params.categoria == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            {% if tipo == 'produccion' %}
+            {% if ver_todos %}<input type="hidden" name="ver_todos" value="1">{% endif %}
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Arete o raza…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-estado">Estado</label>
+                <select name="estado" id="f-estado" class="filtro-input">
+                    <option value="" {% if not estado and ver_todos %}selected{% endif %}>Todos</option>
+                    <option value="activo" {% if estado == 'activo' %}selected{% endif %}>En granja</option>
+                    {% for valor, nombre in estados %}
+                    {% if valor != 'activo' %}
+                    <option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-corral">Corral</label>
+                <select name="corral" id="f-corral" class="filtro-input">
+                    <option value="">Todos</option>
+                    <option value="sin" {% if corral_id == 'sin' %}selected{% endif %}>Sin corral</option>
+                    {% for cr in corrales %}
+                    <option value="{{ cr.pk }}" {% if corral_id == cr.pk|stringformat:'i' %}selected{% endif %}>{{ cr.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-categoria">Categoría</label>
+                <select name="categoria" id="f-categoria" class="filtro-input">
+                    <option value="">Todas</option>
+                    <option value="sin" {% if categoria_id == 'sin' %}selected{% endif %}>Sin categoría</option>
+                    {% for cat in categorias_cerdo %}
+                    <option value="{{ cat.pk }}" {% if categoria_id == cat.pk|stringformat:'i' %}selected{% endif %}>{{ cat.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            {% if tipo == 'sanitario' %}
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar</label>
+                <input type="text" name="q" id="f-q" value="{{ q|default:'' }}" placeholder="Arete o vacuna…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-vacuna">Vacuna</label>
+                <select name="vacuna" id="f-vacuna" class="filtro-input">
+                    <option value="">Todas</option>
+                    {% for v in vacunas_cat %}
+                    <option value="{{ v.pk }}" {% if vacuna_id == v.pk|stringformat:'i' %}selected{% endif %}>{{ v.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            {% if tipo == 'sanitario' or tipo == 'alimentacion' or tipo == 'reproductivo' %}
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-desde">Desde</label>
+                <input type="date" name="desde" id="f-desde" value="{{ desde }}" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-hasta">Hasta</label>
+                <input type="date" name="hasta" id="f-hasta" value="{{ hasta }}" class="filtro-input">
+            </div>
+            {% endif %}
+
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% url 'reportes:ver' tipo %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <p class="reporte-ver-resumen">
+        <strong>{{ total_filas }}</strong> fila{{ total_filas|pluralize:"s" }}
+        {% if tipo == 'produccion' and not ver_todos and estado == 'activo' %}
+        · por defecto solo cerdos <strong>en granja</strong>
+        {% endif %}
+    </p>
+
+    <table class="panel-table">
+        <thead><tr>{% for h in encabezados %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+        <tbody>
+            {% for fila in filas %}
+            <tr>{% for celda in fila %}<td>{{ celda }}</td>{% endfor %}</tr>
+            {% empty %}
+            <tr><td colspan="{{ encabezados|length }}" class="table-empty">Sin datos con estos filtros</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

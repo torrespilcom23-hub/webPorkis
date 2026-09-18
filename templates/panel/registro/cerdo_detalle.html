@@ -1,0 +1,270 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_heading %}Cerdo {{ cerdo.arete }}{% endblock %}
+
+{% block panel_content %}
+
+<div class="panel-table-wrap panel-detail-card" style="margin-bottom:1.5rem;">
+
+    <div class="panel-table-header">
+
+        <h2>{{ cerdo.arete }}{% if cerdo.nombre %} — {{ cerdo.nombre }}{% endif %}</h2>
+
+        <div class="btn-group">
+
+            {% if cerdo.estado == 'activo' %}
+
+            <button type="button" class="btn-sm btn-panel"
+
+                    data-modal-peso data-arete="{{ cerdo.arete }}"
+
+                    data-peso-anterior="{% if cerdo.peso_actual %}{{ cerdo.peso_actual }}{% endif %}"
+
+                    data-url="{% url 'registro:cerdo_peso' cerdo.pk %}">Pesar</button>
+
+            <button type="button" class="btn-sm btn-panel"
+
+                    data-modal-vacuna data-arete="{{ cerdo.arete }}"
+
+                    data-url="{% url 'vacunas:aplicacion_cerdo' cerdo.pk %}">Vacunar</button>
+
+            <button type="button" class="btn-sm btn-success"
+
+                    data-modal-estado="vendido" data-arete="{{ cerdo.arete }}"
+
+                    data-url="{% url 'registro:cerdo_estado' cerdo.pk %}">Vender</button>
+
+            <button type="button" class="btn-sm btn-outline-danger"
+
+                    data-modal-estado="fallecido" data-arete="{{ cerdo.arete }}"
+
+                    data-url="{% url 'registro:cerdo_estado' cerdo.pk %}">Falleció</button>
+
+            {% endif %}
+
+            <a href="{% url 'registro:cerdo_editar' cerdo.pk %}" class="btn-sm btn-secondary">Editar</a>
+
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-secondary">Volver</a>
+
+        </div>
+
+    </div>
+
+    <div class="detail-grid">
+
+        <div class="detail-item"><strong>Raza</strong>{{ cerdo.raza_display }}</div>
+
+        <div class="detail-item"><strong>Sexo</strong>{{ cerdo.get_sexo_display }}</div>
+
+        <div class="detail-item"><strong>Categoría</strong>{{ cerdo.categoria|default:"—" }}</div>
+
+        <div class="detail-item"><strong>Estado</strong>
+
+            {% if cerdo.estado == 'activo' %}
+
+            <span class="badge badge-success">En granja</span>
+
+            {% elif cerdo.estado == 'vendido' %}
+
+            <span class="badge badge-warning">Vendido</span>
+
+            {% else %}
+
+            <span class="badge badge-danger">Fallecido</span>
+
+            {% endif %}
+
+        </div>
+
+        <div class="detail-item"><strong>Nacimiento</strong>{{ cerdo.fecha_nacimiento }} ({{ cerdo.edad_display }})</div>
+
+        <div class="detail-item"><strong>Ingreso</strong>{{ cerdo.fecha_ingreso|default:"Nació en la granja" }}</div>
+
+        {% if cerdo.fecha_salida %}
+
+        <div class="detail-item"><strong>{% if cerdo.estado == 'vendido' %}Fecha de venta{% else %}Fecha de fallecimiento{% endif %}</strong>{{ cerdo.fecha_salida }}</div>
+
+        {% endif %}
+
+        {% if cerdo.precio_venta %}
+
+        <div class="detail-item"><strong>Precio de venta</strong>S/. {{ cerdo.precio_venta }}</div>
+
+        {% endif %}
+
+        <div class="detail-item"><strong>Peso actual</strong>{% if cerdo.peso_actual %}{{ cerdo.peso_actual|floatformat:2 }} kg{% else %}—{% endif %}</div>
+
+        <div class="detail-item"><strong>Corral</strong>{% if cerdo.corral %}{{ cerdo.corral.nombre }}{% else %}—{% endif %}</div>
+
+        <div class="detail-item"><strong>Lote</strong>{{ cerdo.lote|default:"—" }}</div>
+
+        {% if cerdo.observaciones %}
+
+        <div class="detail-item" style="grid-column:1/-1;"><strong>Observaciones</strong>{{ cerdo.observaciones }}</div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+
+<div class="panel-table-wrap" style="margin-bottom:1.5rem;">
+
+    <div class="panel-table-header"><h2>Historial de pesajes</h2></div>
+
+    <table class="panel-table">
+
+        <thead><tr><th>Fecha</th><th>Peso (kg)</th><th>Observaciones</th><th></th></tr></thead>
+
+        <tbody>
+
+            {% for p in pesajes %}
+
+            <tr>
+
+                <td>{{ p.fecha }}</td>
+
+                <td><strong>{{ p.peso_kg|floatformat:2 }}</strong></td>
+
+                <td>{{ p.observaciones|default:"—" }}</td>
+
+                <td><a href="{% url 'registro:pesaje_eliminar' p.pk %}" class="btn-sm btn-danger">Eliminar</a></td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr><td colspan="4" class="table-empty">Sin pesajes registrados</td></tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+<div class="grid-2">
+
+    <div class="panel-table-wrap">
+
+        <div class="panel-table-header">
+            <h2>Vacunas</h2>
+            {% if cerdo.estado == 'activo' %}
+            <button type="button" class="btn-sm btn-panel"
+                    data-modal-vacuna data-arete="{{ cerdo.arete }}"
+                    data-url="{% url 'vacunas:aplicacion_cerdo' cerdo.pk %}">+ Vacunar</button>
+            {% endif %}
+        </div>
+
+        <table class="panel-table">
+
+            <thead><tr><th>Vacuna</th><th>Fecha</th><th>Dosis</th><th>Próxima</th><th></th></tr></thead>
+
+            <tbody>
+
+                {% for v in vacunas %}
+
+                <tr>
+                    <td>{{ v.vacuna.nombre }}</td>
+                    <td>{{ v.fecha_aplicacion }}</td>
+                    <td>{{ v.dosis }}</td>
+                    <td>
+                        {% if v.proxima_dosis %}
+                            {% if v.pendiente %}<span class="badge badge-danger">{{ v.proxima_dosis }}</span>
+                            {% else %}{{ v.proxima_dosis }}{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="btn-group">
+                        {% if cerdo.estado == 'activo' %}
+                        <a href="{% url 'vacunas:aplicacion_refuerzo' v.pk %}" class="btn-sm btn-panel">Refuerzo</a>
+                        {% endif %}
+                        <a href="{% url 'vacunas:aplicacion_editar' v.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    </td>
+                </tr>
+
+                {% empty %}<tr><td colspan="5" class="table-empty">Sin vacunas registradas</td></tr>{% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% if cerdo.madre %}
+    <div class="panel-table-wrap">
+        <div class="panel-table-header"><h2>Origen</h2></div>
+        <p class="panel-hint" style="padding:0 1.5rem 1rem;margin:0;">
+            Madre: <a href="{% url 'registro:cerdo_detalle' cerdo.madre.pk %}"><strong>{{ cerdo.madre.arete }}</strong></a>
+            {% if cerdo.parto %} · Parto {{ cerdo.parto.fecha|date:"d/m/Y" }}{% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+    {% if cerdo.sexo == 'H' and crias %}
+    <div class="panel-table-wrap">
+        <div class="panel-table-header"><h2>Crías registradas</h2></div>
+        <table class="panel-table">
+            <thead><tr><th>Arete</th><th>Sexo</th><th>Nacimiento</th><th>Categoría</th></tr></thead>
+            <tbody>
+                {% for c in crias %}
+                <tr>
+                    <td><a href="{% url 'registro:cerdo_detalle' c.pk %}">{{ c.arete }}</a></td>
+                    <td>{{ c.get_sexo_display }}</td>
+                    <td>{{ c.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    <td>{{ c.categoria|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="panel-table-wrap">
+
+        <div class="panel-table-header">
+            <h2>Inseminaciones</h2>
+            {% if cerdo.sexo == 'H' %}
+            <a href="{% url 'inseminacion:crear' %}?cerda={{ cerdo.pk }}" class="btn-sm btn-panel">+ Inseminación</a>
+            {% endif %}
+        </div>
+
+        <table class="panel-table">
+
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Padrillo</th><th>Diagnóstico</th></tr></thead>
+
+            <tbody>
+
+                {% for i in inseminaciones %}
+
+                <tr>
+                    <td>{{ i.fecha|date:"d/m/Y" }}</td>
+                    <td><span class="repro-tipo repro-tipo--{{ i.tipo }}">{{ i.get_tipo_display }}</span></td>
+                    <td>{{ i.padrillo.codigo|default:"—" }}</td>
+                    <td>{% include 'panel/inseminacion/_badge_diagnostico.html' with inseminacion=i %}</td>
+                </tr>
+
+                {% empty %}<tr><td colspan="4" class="table-empty">Sin registros</td></tr>{% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+
+{% include 'panel/registro/_modal_estado.html' %}
+
+{% include 'panel/registro/_modal_peso.html' %}
+
+{% include 'panel/vacunas/_modal_vacuna.html' %}
+
+{% endblock %}
+

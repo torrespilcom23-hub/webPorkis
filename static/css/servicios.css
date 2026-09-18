@@ -1,0 +1,128 @@
+.page-hero {
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    color: white;
+    padding: 5rem 0 4rem;
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    margin-bottom: 0.75rem;
+}
+
+.page-hero p { opacity: 0.85; font-size: 1.05rem; }
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.service-card .service-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.service-card h2 {
+    font-size: 1.25rem;
+    color: var(--green-dark);
+    margin-bottom: 0.75rem;
+}
+
+.service-card p {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+}
+
+.benefits-list {
+    list-style: none;
+    border-top: 1px solid var(--gray-200);
+    padding-top: 1rem;
+}
+
+.benefits-list li {
+    padding: 0.35rem 0;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    padding-left: 1.25rem;
+    position: relative;
+}
+
+.benefits-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--green);
+    font-weight: 700;
+}
+
+.faq-list { max-width: 760px; margin: 0 auto; }
+
+.faq-item {
+    background: white;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.faq-item summary {
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--green-dark);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-item summary::-webkit-details-marker { display: none; }
+
+.faq-item summary::after {
+    content: '+';
+    font-size: 1.25rem;
+    color: var(--green);
+    transition: transform 0.2s;
+}
+
+.faq-item[open] summary::after { content: '−'; }
+
+.faq-item p {
+    padding: 0 1.5rem 1.25rem;
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.cta-banner {
+    background: var(--gray-50);
+    padding: 3rem 0;
+}
+
+.cta-banner-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.cta-banner h2 {
+    color: var(--green-dark);
+    margin-bottom: 0.5rem;
+}
+
+.cta-banner p { color: var(--gray-600); }
+
+@media (max-width: 768px) {
+    .cta-banner-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+}

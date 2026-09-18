@@ -1,0 +1,18 @@
+<nav class="stock-tabs" aria-label="Módulo inseminación">
+    <a href="{% url 'inseminacion:index' %}{% if query_tabs %}?{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if tab_activo == 'historial' %} is-active{% endif %}">
+        Inseminaciones <span class="stock-tab__count">{{ total_inseminaciones }}</span>
+    </a>
+    <a href="{% url 'inseminacion:index' %}?vista=pendientes{% if query_tabs %}&{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if tab_activo == 'pendientes' %} is-active{% endif %}{% if pendientes_diagnostico %} stock-tab--alert{% endif %}">
+        Pendientes <span class="stock-tab__count{% if pendientes_diagnostico %} stock-tab__count--danger{% endif %}">{{ pendientes_diagnostico }}</span>
+    </a>
+    <a href="{% url 'inseminacion:partos' %}"
+       class="stock-tab{% if tab_activo == 'partos' %} is-active{% endif %}">
+        Partos <span class="stock-tab__count">{{ total_partos }}</span>
+    </a>
+    <a href="{% url 'inseminacion:padrillos' %}"
+       class="stock-tab{% if tab_activo == 'padrillos' %} is-active{% endif %}">
+        Padrillos <span class="stock-tab__count">{{ total_padrillos }}</span>
+    </a>
+</nav>

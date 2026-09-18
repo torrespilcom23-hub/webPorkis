@@ -1,0 +1,78 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Verracos de la granja y lotes de semen externo para inseminación artificial.
+</p>
+
+<div class="alert alert-info panel-hint catalog-hint">
+    <ul class="catalog-hint__list">
+        <li><strong>Interno</strong> — verraco en la granja (ej. arete del macho).</li>
+        <li><strong>Externo</strong> — semen comprado; controle el stock de <strong>pajuelas</strong>.</li>
+    </ul>
+</div>
+
+{% include 'panel/inseminacion/_tabs.html' %}
+
+{% if padrillos_bajo_stock %}
+<div class="kpi-grid kpi-grid--compact kpi-grid--repro">
+    <div class="kpi-card warning">
+        <div class="kpi-value">{{ padrillos_bajo_stock }}</div>
+        <div class="kpi-label">Stock bajo (≤2 pajuelas)</div>
+    </div>
+</div>
+{% endif %}
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Catálogo de padrillos</h2>
+        <div class="btn-group">
+            <a href="{% url 'inseminacion:padrillo_crear' %}" class="btn-sm btn-panel">+ Nuevo padrillo</a>
+        </div>
+    </div>
+    <table class="panel-table catalog-table panel-table--repro">
+        <thead><tr>
+            <th>Código</th><th>Raza</th><th>Origen</th><th>Pajuelas</th><th>Uso</th><th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for p in padrillos %}
+            <tr>
+                <td><strong>{{ p.codigo }}</strong></td>
+                <td>{{ p.raza }}</td>
+                <td>
+                    <span class="repro-origen repro-origen--{{ p.origen }}">{{ p.get_origen_display }}</span>
+                </td>
+                <td>
+                    {% if p.origen == 'externo' %}
+                    <span class="repro-stock">
+                        {% if p.stock_pajuelas <= 2 %}
+                        <span class="badge badge-warning">{{ p.stock_pajuelas }}</span>
+                        <span class="text-muted-sm">bajo</span>
+                        {% else %}
+                        <span class="badge badge-muted">{{ p.stock_pajuelas }}</span>
+                        {% endif %}
+                    </span>
+                    {% else %}<span class="text-muted-sm">N/A</span>{% endif %}
+                </td>
+                <td>
+                    <span class="badge" title="Inseminaciones registradas">{{ p.num_inseminaciones }} insem.</span>
+                </td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'inseminacion:padrillo_editar' p.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    </span>
+                    {% if es_admin %}
+                    <span class="acciones-cerdo__sep" aria-hidden="true"></span>
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'inseminacion:padrillo_eliminar' p.pk %}" class="btn-sm btn-outline-danger">Eliminar</a>
+                    </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="table-empty">Sin padrillos. Registre verracos o lotes de semen para IA.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

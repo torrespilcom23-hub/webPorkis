@@ -1,0 +1,96 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_heading %}Inventario{% endblock %}
+
+{% block panel_content %}
+<div class="kpi-grid" style="margin-bottom:1.5rem;">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ page_obj.paginator.count }}</div>
+        <div class="kpi-label">Productos registrados</div>
+    </div>
+    <div class="kpi-card {% if total_stock_bajo %}danger{% endif %}">
+        <div class="kpi-value">{{ total_stock_bajo }}</div>
+        <div class="kpi-label">Con stock bajo</div>
+    </div>
+    <div class="kpi-card {% if total_por_vencer %}danger{% endif %}">
+        <div class="kpi-value">{{ total_por_vencer }}</div>
+        <div class="kpi-label">Vencidos o por vencer (30 días)</div>
+    </div>
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Productos</h2>
+        <div class="btn-group">
+            <a href="{% url 'inventario:movimientos' %}" class="btn-sm btn-secondary">Historial</a>
+            <a href="{% url 'inventario:movimiento' %}" class="btn-sm btn-secondary">+ Movimiento</a>
+            <a href="{% url 'inventario:crear' %}" class="btn-sm btn-panel">+ Nuevo producto</a>
+        </div>
+    </div>
+
+    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
+        <form method="get" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Buscar por código o nombre..."
+                   style="padding:0.5rem 0.85rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:0.875rem; min-width:220px;">
+            <select name="categoria" style="padding:0.5rem 0.85rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:0.875rem;">
+                <option value="">Todas las categorías</option>
+                {% for valor, nombre in categorias %}
+                <option value="{{ valor }}" {% if categoria == valor %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+            <label style="font-size:0.875rem; display:flex; align-items:center; gap:0.35rem; cursor:pointer;">
+                <input type="checkbox" name="stock_bajo" value="1" {% if solo_stock_bajo %}checked{% endif %}>
+                Solo stock bajo
+            </label>
+            <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+            <a href="{% url 'inventario:lista' %}" class="btn-sm btn-secondary">Limpiar</a>
+        </form>
+    </div>
+
+    <table class="panel-table">
+        <thead>
+            <tr>
+                <th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock</th>
+                <th>Vencimiento</th><th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td><a href="{% url 'inventario:detalle' p.pk %}"><strong>{{ p.codigo }}</strong></a></td>
+                <td>{{ p.nombre }}</td>
+                <td>{{ p.get_categoria_display }}</td>
+                <td>
+                    {% if p.stock_bajo %}<span class="badge badge-danger">{{ p.stock_actual }} {{ p.unidad }}</span>
+                    {% else %}<span class="badge badge-success">{{ p.stock_actual }} {{ p.unidad }}</span>{% endif %}
+                    <div style="font-size:0.72rem; color:#9ca3af; margin-top:2px;">mín: {{ p.stock_minimo }}</div>
+                </td>
+                <td>
+                    {% if p.vencido %}<span class="badge badge-danger">Vencido</span>
+                    {% elif p.por_vencer %}<span class="badge badge-warning">{{ p.fecha_vencimiento }}</span>
+                    {% else %}{{ p.fecha_vencimiento|default:"—" }}{% endif %}
+                </td>
+                <td class="btn-group">
+                    <a href="{% url 'inventario:editar' p.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    <a href="{% url 'inventario:eliminar' p.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" style="text-align:center;color:#9ca3af;">No hay productos registrados</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

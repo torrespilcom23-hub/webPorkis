@@ -1,0 +1,33 @@
+<div class="repro-pipeline" role="list" aria-label="Flujo reproductivo">
+    <div class="repro-pipeline__step" role="listitem">
+        <span class="repro-pipeline__num">1</span>
+        <div>
+            <strong>Inseminación</strong>
+            <span>Servicio natural o artificial</span>
+        </div>
+    </div>
+    <span class="repro-pipeline__arrow" aria-hidden="true">→</span>
+    <div class="repro-pipeline__step" role="listitem">
+        <span class="repro-pipeline__num">2</span>
+        <div>
+            <strong>Diagnóstico</strong>
+            <span>A los {{ dias_diagnostico|default:21 }} días</span>
+        </div>
+    </div>
+    <span class="repro-pipeline__arrow" aria-hidden="true">→</span>
+    <div class="repro-pipeline__step" role="listitem">
+        <span class="repro-pipeline__num">3</span>
+        <div>
+            <strong>Parto</strong>
+            <span>~{{ dias_gestacion|default:114 }} días de gestación</span>
+        </div>
+    </div>
+    <span class="repro-pipeline__arrow" aria-hidden="true">→</span>
+    <div class="repro-pipeline__step repro-pipeline__step--muted" role="listitem">
+        <span class="repro-pipeline__num">+</span>
+        <div>
+            <strong>Padrillos</strong>
+            <span>Catálogo de semen</span>
+        </div>
+    </div>
+</div>

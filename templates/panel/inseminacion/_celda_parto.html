@@ -1,0 +1,24 @@
+{% with parto=inseminacion.partos.first %}
+<div class="repro-parto-cell">
+{% if parto %}
+    <a href="{% url 'inseminacion:parto_editar' parto.pk %}" class="repro-parto-cell__fecha">{{ parto.fecha|date:"d/m/Y" }}</a>
+    <span class="repro-parto-cell__meta">{{ parto.lechones_vivos }} vivos{% if parto.lechones_muertos %}, {{ parto.lechones_muertos }} muert.{% endif %}</span>
+{% elif inseminacion.tiene_diagnostico and inseminacion.diagnostico.resultado == 'positivo' %}
+    {% if inseminacion.fecha_parto_estimada %}
+    <span class="repro-parto-cell__est">Est. {{ inseminacion.fecha_parto_estimada|date:"d/m/Y" }}</span>
+    {% if inseminacion.dias_restantes_parto != None %}
+        {% if inseminacion.dias_restantes_parto > 14 %}
+        <span class="repro-parto-cell__meta">Faltan {{ inseminacion.dias_restantes_parto }} días</span>
+        {% elif inseminacion.dias_restantes_parto > 0 %}
+        <span class="repro-parto-cell__meta repro-parto-cell__meta--proximo">Parto próximo · {{ inseminacion.dias_restantes_parto }} d</span>
+        {% else %}
+        <span class="repro-parto-cell__meta repro-parto-cell__meta--vencido">Fecha estimada superada</span>
+        {% endif %}
+    {% endif %}
+    {% endif %}
+    <a href="{% url 'inseminacion:parto_crear' %}?inseminacion={{ inseminacion.pk }}" class="btn-sm btn-panel repro-parto-cell__cta">+ Parto</a>
+{% else %}
+    <span class="text-muted-sm">—</span>
+{% endif %}
+</div>
+{% endwith %}

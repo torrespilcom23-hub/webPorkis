@@ -1,0 +1,27 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Reportes{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Exporte datos del panel en <strong>PDF</strong> o <strong>Excel</strong>. Elija un reporte, aplique filtros si lo necesita y descargue.
+</p>
+
+{% if stock_bajo %}
+<div class="alert alert-warning reportes-alerta">
+    Hay <strong>{{ stock_bajo }}</strong> producto(s) con stock en o por debajo del mínimo.
+    <a href="{% url 'reportes:ver' 'inventario' %}">Ver inventario</a>
+</div>
+{% endif %}
+
+<div class="reportes-grid">
+    {% for t in tarjetas %}
+    <a href="{% url 'reportes:ver' t.key %}" class="reporte-card">
+        <span class="reporte-card__icon" aria-hidden="true">{{ t.icono }}</span>
+        <h3 class="reporte-card__title">{{ t.nombre }}</h3>
+        <p class="reporte-card__desc">{{ t.descripcion }}</p>
+        <span class="reporte-card__meta">
+            <strong>{{ t.conteo }}</strong> {{ t.conteo_etiqueta }}
+        </span>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

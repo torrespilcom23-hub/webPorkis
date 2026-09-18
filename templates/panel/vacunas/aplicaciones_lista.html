@@ -1,0 +1,156 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Vacunas{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    {% if vista_vencidas %}
+    Refuerzos <strong>vencidos</strong> en cerdos en granja — requieren aplicación.
+    {% elif vista_proximas %}
+    Refuerzos programados en los <strong>próximos 7 días</strong>.
+    {% else %}
+    Registro de vacunas aplicadas a los cerdos de la <strong>granja</strong> y control de refuerzos.
+    {% endif %}
+</p>
+
+{% if total_catalogo == 0 and vista_historial %}
+<div class="alert alert-success panel-hint">
+    <strong>Primer paso:</strong> vaya a la pestaña <a href="{% url 'vacunas:catalogo' %}">Catálogo</a> y agregue las vacunas que usa su granja (ej. Circovirus, Mycoplasma). Después podrá registrar aplicaciones en cada cerdo.
+</div>
+{% endif %}
+
+{% include 'panel/vacunas/_tabs.html' %}
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ page_obj.paginator.count }}</div>
+        <div class="kpi-label">Resultados filtrados</div>
+    </div>
+    {% if vista_historial %}
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ aplicaciones_mes }}</div>
+        <div class="kpi-label">Aplicaciones este mes</div>
+    </div>
+    {% endif %}
+    {% if vencidas %}
+    <a href="?vista=vencidas" class="kpi-card danger">
+        <div class="kpi-value">{{ vencidas }}</div>
+        <div class="kpi-label">Vencidas (en granja)</div>
+    </a>
+    {% elif vista_historial %}
+    <div class="kpi-card">
+        <div class="kpi-value">0</div>
+        <div class="kpi-label">Vencidas (en granja)</div>
+    </div>
+    {% endif %}
+    {% if proximas_7d %}
+    <a href="?vista=proximas" class="kpi-card warning">
+        <div class="kpi-value">{{ proximas_7d }}</div>
+        <div class="kpi-label">Próximas 7 días</div>
+    </a>
+    {% elif vista_historial %}
+    <div class="kpi-card">
+        <div class="kpi-value">0</div>
+        <div class="kpi-label">Próximas 7 días</div>
+    </div>
+    {% endif %}
+    <div class="kpi-card">
+        <div class="kpi-value">{{ total_catalogo }}</div>
+        <div class="kpi-label">Vacunas en catálogo</div>
+    </div>
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>{% if vista_vencidas %}Refuerzos vencidos{% elif vista_proximas %}Próximos refuerzos{% else %}Historial de aplicaciones{% endif %}</h2>
+        <div class="btn-group">
+            <a href="{% url 'vacunas:aplicacion_crear' %}" class="btn-sm btn-panel"{% if total_catalogo == 0 %} title="Primero agregue vacunas al catálogo"{% endif %}>+ Registrar aplicación</a>
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form filtros-form--inline">
+            {% if vista_vencidas %}<input type="hidden" name="vista" value="vencidas">{% endif %}
+            {% if vista_proximas %}<input type="hidden" name="vista" value="proximas">{% endif %}
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Arete, nombre o vacuna…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-vacuna">Vacuna</label>
+                <select name="vacuna" id="f-vacuna" class="filtro-input">
+                    <option value="">Todas</option>
+                    {% for v in vacunas_cat %}
+                    <option value="{{ v.pk }}" {% if vacuna_id == v.pk|stringformat:'i' %}selected{% endif %}>{{ v.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-desde">Desde</label>
+                <input type="date" name="desde" id="f-desde" value="{{ desde }}" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-hasta">Hasta</label>
+                <input type="date" name="hasta" id="f-hasta" value="{{ hasta }}" class="filtro-input">
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% if vista_vencidas %}?vista=vencidas{% elif vista_proximas %}?vista=proximas{% else %}{% url 'vacunas:aplicaciones' %}{% endif %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="panel-table">
+        <thead><tr>
+            <th>Cerdo</th><th>Vacuna</th><th>Fecha</th><th>Dosis</th>
+            <th>Próxima dosis</th><th>Responsable</th><th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for a in aplicaciones %}
+            <tr>
+                <td>
+                    <a href="{% url 'registro:cerdo_detalle' a.cerdo.pk %}"><strong>{{ a.cerdo.arete }}</strong></a>
+                    {% if a.cerdo.nombre %}<br><small style="color:#9ca3af;">{{ a.cerdo.nombre }}</small>{% endif %}
+                </td>
+                <td>{{ a.vacuna.nombre }}</td>
+                <td>{{ a.fecha_aplicacion }}</td>
+                <td>{{ a.dosis }}</td>
+                <td>
+                    {% if a.proxima_dosis %}
+                        {% if a.proxima_dosis <= hoy %}
+                        <span class="badge badge-danger">{{ a.proxima_dosis }}</span>
+                        {% elif a.proxima_dosis <= limite_alerta %}
+                        <span class="badge badge-warning">{{ a.proxima_dosis }}</span>
+                        {% else %}
+                        {{ a.proxima_dosis }}
+                        {% endif %}
+                    {% else %}—{% endif %}
+                </td>
+                <td>{{ a.responsable.username }}</td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        {% if a.cerdo.estado == 'activo' %}
+                        <a href="{% url 'vacunas:aplicacion_refuerzo' a.pk %}" class="btn-sm btn-panel" title="Registrar refuerzo de {{ a.vacuna.nombre }}">Refuerzo</a>
+                        {% endif %}
+                        <a href="{% url 'vacunas:aplicacion_editar' a.pk %}" class="btn-sm btn-secondary">Editar</a>
+                        <a href="{% url 'vacunas:aplicacion_eliminar' a.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="table-empty">No hay aplicaciones con estos filtros</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

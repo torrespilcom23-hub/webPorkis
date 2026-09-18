@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Servicios — Granja Porkis{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/servicios.css' %}?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>Nuestros Servicios</h1>
+        <p>Soluciones alineadas con la operación real de nuestra granja</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="services-grid">
+            {% include 'public/_servicios_cards.html' %}
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Preguntas frecuentes</h2>
+        </div>
+        <div class="faq-list fade-in">
+            <details class="faq-item">
+                <summary>¿Cuál es el pedido mínimo de lechones?</summary>
+                <p>El pedido mínimo es de 20 lechones. Para volúmenes mayores ofrecemos condiciones especiales.</p>
+            </details>
+            <details class="faq-item">
+                <summary>¿Realizan entregas fuera de la región?</summary>
+                <p>Sí, contamos con transporte especializado para entregas a nivel nacional con bioseguridad garantizada.</p>
+            </details>
+            <details class="faq-item">
+                <summary>¿Qué certificaciones tienen?</summary>
+                <p>Contamos con registros SENASA vigentes, protocolos de bioseguridad certificados y trazabilidad completa.</p>
+            </details>
+            <details class="faq-item">
+                <summary>¿Ofrecen visitas a la granja?</summary>
+                <p>Sí, programamos visitas guiadas previa cita. Contáctanos para agendar.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
+<section class="section cta-banner fade-in">
+    <div class="container cta-banner-inner">
+        <div>
+            <h2>¿Tienes un proyecto porcino?</h2>
+            <p>Cuéntanos tus necesidades y te asesoramos sin compromiso.</p>
+        </div>
+        <a href="{% url 'publico:contacto' %}" class="btn btn-primary">Solicitar información</a>
+    </div>
+</section>
+{% endblock %}

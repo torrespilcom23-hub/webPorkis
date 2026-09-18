@@ -1,0 +1,101 @@
+<div id="modal-vacuna" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mv-titulo">
+        <h3 id="mv-titulo">Registrar vacuna</h3>
+        <p id="mv-texto"></p>
+        <form id="mv-form" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="volver" id="mv-volver" value="">
+            <div class="form-group">
+                <label for="mv-vacuna">Vacuna</label>
+                <select name="vacuna" id="mv-vacuna" required>
+                    <option value="">— Seleccione —</option>
+                    {% for v in vacunas_catalogo %}
+                    <option value="{{ v.pk }}" data-intervalo="{{ v.intervalo_dias|default:'' }}">{{ v.nombre }}{% if v.intervalo_dias %} (refuerzo {{ v.intervalo_dias }}d){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <p id="mv-intervalo-ref" class="modal-peso-ref" hidden></p>
+            <div class="form-group">
+                <label for="mv-fecha">Fecha de aplicación</label>
+                <input type="date" name="fecha_aplicacion" id="mv-fecha" required>
+            </div>
+            <div class="form-group">
+                <label for="mv-dosis">Dosis</label>
+                <input type="text" name="dosis" id="mv-dosis" maxlength="100" placeholder="Ej. 2 ml" required>
+            </div>
+            <div class="form-group">
+                <label for="mv-lote">Lote medicamento <span style="font-weight:400;color:#6b7280;">— opcional</span></label>
+                <input type="text" name="lote_medicamento" id="mv-lote" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="mv-obs">Observaciones <span style="font-weight:400;color:#6b7280;">— opcional</span></label>
+                <input type="text" name="observaciones" id="mv-obs" maxlength="200">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-sm btn-secondary" id="mv-cancel">Cancelar</button>
+                <button type="submit" class="btn-sm btn-panel" id="mv-ok">Guardar aplicación</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var overlay = document.getElementById('modal-vacuna');
+    if (!overlay) return;
+    var form = document.getElementById('mv-form');
+    var titulo = document.getElementById('mv-titulo');
+    var texto = document.getElementById('mv-texto');
+    var volver = document.getElementById('mv-volver');
+    var vacuna = document.getElementById('mv-vacuna');
+    var intervaloRef = document.getElementById('mv-intervalo-ref');
+    var fecha = document.getElementById('mv-fecha');
+    var btnCancel = document.getElementById('mv-cancel');
+
+    function hoyLocal() {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function actualizarIntervalo() {
+        var opt = vacuna.options[vacuna.selectedIndex];
+        var dias = opt && opt.dataset.intervalo;
+        if (dias) {
+            intervaloRef.textContent = 'Próxima dosis se calculará automáticamente en ' + dias + ' días.';
+            intervaloRef.hidden = false;
+        } else if (vacuna.value) {
+            intervaloRef.textContent = 'Esta vacuna no tiene intervalo definido; puede editar la próxima dosis después.';
+            intervaloRef.hidden = false;
+        } else {
+            intervaloRef.hidden = true;
+        }
+    }
+
+    function abrir(btn) {
+        form.action = btn.dataset.url;
+        volver.value = window.location.pathname;
+        titulo.textContent = 'Registrar vacuna';
+        texto.textContent = 'Cerdo ' + btn.dataset.arete + '.';
+        vacuna.value = '';
+        fecha.value = hoyLocal();
+        fecha.max = hoyLocal();
+        document.getElementById('mv-dosis').value = '';
+        document.getElementById('mv-lote').value = '';
+        document.getElementById('mv-obs').value = '';
+        intervaloRef.hidden = true;
+        overlay.hidden = false;
+        vacuna.focus();
+    }
+    function cerrar() { overlay.hidden = true; }
+
+    vacuna.addEventListener('change', actualizarIntervalo);
+    document.querySelectorAll('[data-modal-vacuna]').forEach(function (btn) {
+        btn.addEventListener('click', function () { abrir(btn); });
+    });
+    btnCancel.addEventListener('click', cerrar);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrar(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !overlay.hidden) cerrar();
+    });
+})();
+</script>

@@ -1,0 +1,53 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}{{ titulo }}{% endblock %}
+{% block panel_content %}
+{% if form.instance.pk %}
+<div class="alert alert-success" style="max-width:640px; margin-bottom:1rem;">
+    Editando: <strong>{{ form.instance.codigo }}</strong> — {{ form.instance.nombre }}
+</div>
+{% else %}
+<div class="alert alert-success" style="max-width:640px; margin-bottom:1rem;">
+    ℹ️ El <strong>código</strong> se generará automáticamente según la categoría elegida
+    (ej. ALM-0001, MED-0001).
+</div>
+{% endif %}
+<form method="post" class="panel-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert" style="max-width:640px; margin-bottom:1rem; background:#fef2f2; color:#991b1b; border:1px solid #fecaca;">
+        ⚠️ {{ form.non_field_errors.0 }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+    <div class="form-row">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.name == 'precio_unitario' %}
+        <div class="input-money">
+            <span class="money-prefix">S/</span>
+            {{ field }}
+        </div>
+        {% else %}
+        {{ field }}
+        {% endif %}
+        {% if field.errors %}<span style="color:#dc2626;font-size:0.8rem;">{{ field.errors.0 }}</span>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="form-actions">
+        <button type="submit" class="btn-sm btn-panel">💾 Guardar</button>
+        <a href="{% url 'inventario:lista' %}" class="btn-sm btn-secondary">Cancelar</a>
+    </div>
+</form>
+<script>
+(function () {
+    // Precio unitario: formatea a 2 decimales al salir del campo (25.9 -> 25.90)
+    const precio = document.getElementById('id_precio_unitario');
+    if (!precio) return;
+    precio.addEventListener('blur', function () {
+        const valor = parseFloat(this.value);
+        if (this.value !== '' && !isNaN(valor)) {
+            this.value = valor.toFixed(2);
+        }
+    });
+})();
+</script>
+{% endblock %}

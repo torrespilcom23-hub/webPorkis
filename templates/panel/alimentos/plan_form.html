@@ -1,0 +1,52 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}{{ titulo }}{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Asigne cuántos kg/día debe recibir un <strong>lote</strong> (grupo de cerdos de <a href="{% url 'registro:lotes' %}">Registro → Lotes</a>).
+</p>
+
+<div class="panel-table-wrap catalog-form-wrap">
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <div class="form-grid-compact catalog-form-grid">
+            <div class="form-row">
+                <label for="{{ form.lote.id_for_label }}">{{ form.lote.label }}</label>
+                {{ form.lote }}
+                <small class="field-hint">Grupo de cerdos creado en Registro → Lotes.</small>
+                {% if form.lote.errors %}<span class="field-error">{{ form.lote.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label for="{{ form.tipo_alimento.id_for_label }}">{{ form.tipo_alimento.label }}</label>
+                {{ form.tipo_alimento }}
+                {% if form.tipo_alimento.errors %}<span class="field-error">{{ form.tipo_alimento.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--intervalo">
+                <label for="{{ form.cantidad_diaria_kg.id_for_label }}">{{ form.cantidad_diaria_kg.label }}</label>
+                {{ form.cantidad_diaria_kg }}
+                <small class="field-hint">Kilogramos que debería recibir el lote cada día.</small>
+                {% if form.cantidad_diaria_kg.errors %}<span class="field-error">{{ form.cantidad_diaria_kg.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label for="{{ form.etapa.id_for_label }}">{{ form.etapa.label }}</label>
+                {{ form.etapa }}
+            </div>
+            <div class="form-row form-row--check">
+                <label class="refuerzo-confirm refuerzo-confirm--inline">
+                    {{ form.activo }}
+                    Ración activa
+                </label>
+                <small class="field-hint">{{ form.activo.help_text }}</small>
+            </div>
+        </div>
+
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Guardar ración</button>
+            <a href="{% url cancel_url|default:'alimentos:planes' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

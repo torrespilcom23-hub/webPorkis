@@ -1,0 +1,57 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Registrar movimiento{% endblock %}
+{% block panel_content %}
+{% if producto_fijo %}
+<div class="alert alert-success" style="max-width:640px; margin-bottom:1rem;">
+    📦 <strong>{{ producto_fijo.codigo }}</strong> — {{ producto_fijo.nombre }}<br>
+    Stock actual: <strong>{{ producto_fijo.stock_actual }} {{ producto_fijo.unidad }}</strong>
+</div>
+{% endif %}
+<form method="post" class="panel-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert" style="max-width:640px; margin-bottom:1rem; background:#fef2f2; color:#991b1b; border:1px solid #fecaca;">
+        ⚠️ {{ form.non_field_errors.0 }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+    {% if field.field.widget.input_type != 'hidden' %}
+    <div class="form-row">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small style="color:#6b7280; font-size:0.8rem;">{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<span style="color:#dc2626;font-size:0.8rem;">{{ field.errors.0 }}</span>{% endif %}
+    </div>
+    {% else %}
+    {{ field }}
+    {% endif %}
+    {% endfor %}
+    {% if producto_fijo %}
+    <p id="stock-preview" style="font-size:0.9rem; font-weight:600; color:#166534; margin:0.25rem 0 0;"></p>
+    {% endif %}
+    <div class="form-actions">
+        <button type="submit" class="btn-sm btn-panel">💾 Guardar</button>
+        <a href="{{ cancel_href }}" class="btn-sm btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% if producto_fijo %}
+<script>
+(function () {
+    const stockActual = parseFloat('{{ producto_fijo.stock_actual }}');
+    const unidad = '{{ producto_fijo.unidad }}';
+    const tipo = document.getElementById('id_tipo');
+    const cantidad = document.getElementById('id_cantidad');
+    const preview = document.getElementById('stock-preview');
+    function actualizar() {
+        const cant = parseFloat(cantidad.value);
+        if (isNaN(cant) || cant <= 0) { preview.textContent = ''; return; }
+        const resultante = tipo.value === 'salida' ? stockActual - cant : stockActual + cant;
+        preview.textContent = 'Stock resultante: ' + resultante.toFixed(2) + ' ' + unidad;
+        preview.style.color = resultante < 0 ? '#dc2626' : '#166534';
+    }
+    tipo.addEventListener('change', actualizar);
+    cantidad.addEventListener('input', actualizar);
+})();
+</script>
+{% endif %}
+{% endblock %}

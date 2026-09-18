@@ -1,0 +1,67 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_heading %}{{ producto.nombre }}{% endblock %}
+
+{% block panel_content %}
+<div class="panel-form" style="max-width:100%; margin-bottom:1.5rem;">
+    <div class="grid-2">
+        <div><strong>Código:</strong> {{ producto.codigo }}</div>
+        <div><strong>Categoría:</strong> {{ producto.get_categoria_display }}</div>
+        <div>
+            <strong>Stock actual:</strong>
+            {% if producto.stock_bajo %}<span class="badge badge-danger">{{ producto.stock_actual }} {{ producto.unidad }}</span>
+            {% else %}<span class="badge badge-success">{{ producto.stock_actual }} {{ producto.unidad }}</span>{% endif %}
+        </div>
+        <div><strong>Stock mínimo:</strong> {{ producto.stock_minimo }} {{ producto.unidad }}</div>
+        <div><strong>Precio unitario:</strong> {% if producto.precio_unitario %}S/ {{ producto.precio_unitario }}{% else %}—{% endif %}</div>
+        <div><strong>Valor en stock:</strong> {% if producto.valor_total %}S/ {{ producto.valor_total }}{% else %}—{% endif %}</div>
+        <div><strong>Proveedor:</strong> {{ producto.proveedor|default:"—" }}</div>
+        <div>
+            <strong>Vencimiento:</strong>
+            {% if producto.vencido %}<span class="badge badge-danger">Vencido ({{ producto.fecha_vencimiento }})</span>
+            {% elif producto.por_vencer %}<span class="badge badge-warning">{{ producto.fecha_vencimiento }} — por vencer</span>
+            {% else %}{{ producto.fecha_vencimiento|default:"—" }}{% endif %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <a href="{% url 'inventario:movimiento' %}?producto={{ producto.pk }}" class="btn-sm btn-panel">+ Registrar movimiento</a>
+        <a href="{% url 'inventario:editar' producto.pk %}" class="btn-sm btn-secondary">Editar</a>
+        <a href="{% url 'inventario:lista' %}" class="btn-sm btn-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header"><h2>Historial de movimientos</h2></div>
+    <table class="panel-table">
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th><th>Registrado por</th></tr></thead>
+        <tbody>
+            {% for m in movimientos %}
+            <tr>
+                <td>{{ m.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if m.tipo == 'entrada' %}<span class="badge badge-success">Entrada</span>
+                    {% else %}<span class="badge badge-warning">Salida</span>{% endif %}
+                </td>
+                <td>{{ m.cantidad }} {{ producto.unidad }}</td>
+                <td>{{ m.motivo|default:"—" }}</td>
+                <td>{{ m.registrado_por.username }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;color:#9ca3af;">Sin movimientos registrados</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn-sm btn-secondary">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn-sm btn-secondary">Siguiente »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

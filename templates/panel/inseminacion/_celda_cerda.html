@@ -1,0 +1,4 @@
+<div class="repro-cerda">
+    <a href="{% url 'registro:cerdo_detalle' cerda.pk %}" class="repro-cerda__arete">{{ cerda.arete }}</a>
+    {% if cerda.nombre %}<span class="repro-cerda__nombre">{{ cerda.nombre }}</span>{% endif %}
+</div>

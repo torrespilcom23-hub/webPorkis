@@ -1,0 +1,125 @@
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.contact-info h2 {
+    color: var(--green-dark);
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.contact-info > p {
+    color: var(--gray-600);
+    margin-bottom: 2rem;
+}
+
+.contact-details {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-details li {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.contact-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    background: var(--gray-50);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-details strong {
+    display: block;
+    color: var(--green-dark);
+    margin-bottom: 0.2rem;
+}
+
+.contact-details p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.contact-form-wrap {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.contact-form .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.contact-form label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--gray-800);
+    margin-bottom: 0.4rem;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    background: var(--white);
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(74, 124, 35, 0.15);
+}
+
+.field-error, .form-error {
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.form-error {
+    background: #fef2f2;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.btn-full { width: 100%; }
+
+.map-wrap {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.map-section { padding-top: 0; }
+
+@media (max-width: 768px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+}

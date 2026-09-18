@@ -1,0 +1,46 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Lotes{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Agrupe cerdos en <strong>lotes</strong> para organizar la granja, el peso meta y la alimentación.
+</p>
+
+<div class="alert alert-info panel-hint catalog-hint">
+    <p class="modulo-flujo__titulo"><strong>¿Qué es un lote?</strong></p>
+    <ul class="catalog-hint__list">
+        <li>Es un <strong>grupo de cerdos</strong> con un nombre (ej. «Engorde setiembre»), fecha de ingreso y meta de peso.</li>
+        <li>Al registrar cerdos, puede asignarlos a un lote para llevar el control por grupo. La columna <strong>Cerdos en granja</strong> cuenta solo los que siguen activos (no vendidos ni fallecidos).</li>
+        <li>En <a href="{% url 'alimentos:planes' %}">Alimentos → Raciones</a> define cuántos kg/día come cada lote; en <a href="{% url 'alimentos:index' %}">Consumo</a> anota lo servido diariamente.</li>
+    </ul>
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Lotes en granja</h2>
+        <div class="btn-group">
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-secondary">Volver a cerdos</a>
+            <a href="{% url 'registro:lote_crear' %}" class="btn-sm btn-panel">+ Nuevo lote</a>
+        </div>
+    </div>
+    <table class="panel-table">
+        <thead><tr><th>Nombre</th><th>Corral</th><th>Ingreso</th><th>Cerdos en granja</th><th>Meta peso</th><th>Acciones</th></tr></thead>
+        <tbody>
+            {% for l in lotes %}
+            <tr>
+                <td><strong>{{ l.nombre }}</strong></td>
+                <td>{{ l.corral|default:"—" }}</td>
+                <td>{{ l.fecha_ingreso|date:"d/m/Y" }}</td>
+                <td><span class="badge badge-success">{{ l.num_cerdos }}</span></td>
+                <td>{% if l.meta_peso %}{{ l.meta_peso }} kg{% else %}—{% endif %}</td>
+                <td class="btn-group">
+                    <a href="{% url 'alimentos:planes' %}?q={{ l.nombre|urlencode }}" class="btn-sm btn-panel" title="Ver ración de alimentación">Ración</a>
+                    <a href="{% url 'registro:lote_editar' l.pk %}" class="btn-sm btn-secondary">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="table-empty">No hay lotes. Cree el primero para agrupar cerdos y alimentación.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

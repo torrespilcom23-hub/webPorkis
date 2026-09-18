@@ -1,0 +1,374 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Stock de cerdos{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    {% if vista_vendidos %}
+    Registro de cerdos <strong>vendidos</strong> — fecha de venta, precio y datos al momento de la baja.
+    {% elif vista_fallecidos %}
+    Registro de cerdos <strong>fallecidos</strong> — fecha del hecho y datos de referencia.
+    {% elif vista_todos_estados %}
+    Listado completo: en granja, vendidos y fallecidos.
+    {% else %}
+    Control operativo por raza, sexo, edad, peso, estado y corral (solo <strong>en granja</strong>).
+    {% endif %}
+</p>
+
+<nav class="stock-tabs" aria-label="Vista por estado">
+    <a href="{% url 'registro:cerdos' %}{% if query_tabs %}?{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if vista_granja %} is-active{% endif %}">
+        En granja <span class="stock-tab__count">{{ total_activos }}</span>
+    </a>
+    <a href="?estado=vendido{% if query_tabs %}&{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if vista_vendidos %} is-active{% endif %}">
+        Vendidos <span class="stock-tab__count">{{ total_vendidos }}</span>
+    </a>
+    <a href="?estado=fallecido{% if query_tabs %}&{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if vista_fallecidos %} is-active{% endif %}">
+        Fallecidos <span class="stock-tab__count">{{ total_fallecidos }}</span>
+    </a>
+    <a href="?estado={% if query_tabs %}&{{ query_tabs }}{% endif %}"
+       class="stock-tab{% if vista_todos_estados %} is-active{% endif %}">
+        Todos <span class="stock-tab__count">{{ total_activos|add:total_vendidos|add:total_fallecidos }}</span>
+    </a>
+</nav>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ page_obj.paginator.count }}</div>
+        <div class="kpi-label">Resultados filtrados</div>
+    </div>
+    {% if vista_granja %}
+    <div class="kpi-card">
+        <div class="kpi-value">{{ total_activos }}</div>
+        <div class="kpi-label">En granja (total)</div>
+    </div>
+    {% endif %}
+    {% if vista_granja and sin_categoria %}
+    <a href="?categoria=sin" class="kpi-card danger">
+        <div class="kpi-value">{{ sin_categoria }}</div>
+        <div class="kpi-label">Sin categoría (en granja)</div>
+    </a>
+    {% elif vista_granja %}
+    <div class="kpi-card">
+        <div class="kpi-value">0</div>
+        <div class="kpi-label">Sin categoría (en granja)</div>
+    </div>
+    {% endif %}
+    {% if vista_granja and sin_corral %}
+    <a href="?sin_corral=1" class="kpi-card danger">
+        <div class="kpi-value">{{ sin_corral }}</div>
+        <div class="kpi-label">Sin corral (en granja)</div>
+    </a>
+    {% elif vista_granja %}
+    <div class="kpi-card">
+        <div class="kpi-value">0</div>
+        <div class="kpi-label">Sin corral (en granja)</div>
+    </div>
+    {% endif %}
+    {% if vista_granja and sin_peso %}
+    <a href="?sin_peso=1" class="kpi-card warning">
+        <div class="kpi-value">{{ sin_peso }}</div>
+        <div class="kpi-label">Sin peso (en granja)</div>
+    </a>
+    {% elif vista_granja %}
+    <div class="kpi-card">
+        <div class="kpi-value">0</div>
+        <div class="kpi-label">Sin peso (en granja)</div>
+    </div>
+    {% endif %}
+    {% if vista_granja and peso_promedio %}
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ peso_promedio|floatformat:1 }}</div>
+        <div class="kpi-label">Peso prom. en granja (kg)</div>
+    </div>
+    {% endif %}
+    {% if vista_vendidos or vista_todos_estados %}
+    <div class="kpi-card warning">
+        <div class="kpi-value">{{ total_vendidos }}</div>
+        <div class="kpi-label">Vendidos (histórico)</div>
+    </div>
+    {% endif %}
+    {% if vista_fallecidos or vista_todos_estados %}
+    <div class="kpi-card danger">
+        <div class="kpi-value">{{ total_fallecidos }}</div>
+        <div class="kpi-label">Fallecidos (histórico)</div>
+    </div>
+    {% endif %}
+</div>
+
+{% if vista_granja %}
+<div class="stock-resumen-grid">
+    <div class="panel-table-wrap">
+        <div class="panel-table-header">
+            <h2>Cantidades por categoría (en granja)</h2>
+            <a href="{% url 'registro:categorias' %}" class="btn-sm btn-secondary">Gestionar categorías</a>
+        </div>
+        <div class="chips-row chips-row--block">
+            {% for c in conteos_categoria %}
+            <a href="?categoria={{ c.categoria_id }}" class="badge badge-success chip-link">{{ c.categoria__nombre }}: {{ c.total }}</a>
+            {% endfor %}
+            {% if sin_categoria %}
+            <a href="?categoria=sin" class="badge badge-danger chip-link">Sin categoría: {{ sin_categoria }}</a>
+            {% endif %}
+            {% if not conteos_categoria and not sin_categoria %}
+            <span class="chips-empty">Sin cerdos categorizados en granja.</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel-table-wrap">
+        <div class="panel-table-header">
+            <h2>Distribución en granja</h2>
+            <a href="{% url 'registro:corrales' %}" class="btn-sm btn-secondary">Gestionar corrales</a>
+        </div>
+        <div class="distrib-grid">
+            <div class="distrib-col">
+                <h3 class="distrib-col__title">Raza</h3>
+                <div class="distrib-col__chips">
+                    {% for r in conteos_raza %}
+                    <a href="?raza={{ r.raza }}" class="badge chip-link">{{ r.raza_nombre }}: {{ r.total }}</a>
+                    {% empty %}<span class="chips-empty">—</span>{% endfor %}
+                </div>
+            </div>
+            <div class="distrib-col">
+                <h3 class="distrib-col__title">Sexo</h3>
+                <div class="distrib-col__chips">
+                    {% for s in conteos_sexo %}
+                    <a href="?sexo={{ s.sexo }}" class="badge chip-link">{{ s.sexo_nombre }}: {{ s.total }}</a>
+                    {% empty %}<span class="chips-empty">—</span>{% endfor %}
+                </div>
+            </div>
+            <div class="distrib-col">
+                <h3 class="distrib-col__title">Corral</h3>
+                <div class="distrib-col__chips">
+                    {% for cr in conteos_corral %}
+                    <a href="?corral={{ cr.corral_id }}" class="badge chip-link">{{ cr.corral__nombre }}: {{ cr.total }}</a>
+                    {% endfor %}
+                    {% if sin_corral %}
+                    <a href="?sin_corral=1" class="badge badge-danger chip-link">Sin corral: {{ sin_corral }}</a>
+                    {% endif %}
+                    {% if not conteos_corral and not sin_corral %}
+                    <span class="chips-empty">Sin corrales asignados.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% elif vista_vendidos %}
+<div class="panel-table-wrap" style="margin-bottom:1.5rem;">
+    <div class="registro-banner">
+        <strong>Registro de ventas.</strong> Los cerdos vendidos salen del stock en granja pero quedan aquí con fecha y precio de venta para reportes y trazabilidad.
+    </div>
+</div>
+{% elif vista_fallecidos %}
+<div class="panel-table-wrap" style="margin-bottom:1.5rem;">
+    <div class="registro-banner registro-banner--fallecidos">
+        <strong>Registro de fallecimientos.</strong> Animales dados de baja por muerte. Use <em>Editar</em> en cada fila si necesita corregir la fecha.
+    </div>
+</div>
+{% elif vista_todos_estados %}
+<div class="panel-table-wrap" style="margin-bottom:1.5rem;">
+    <div class="registro-banner registro-banner--todos">
+        Vista unificada de todos los estados. Use las pestañas <strong>Vendidos</strong> o <strong>Fallecidos</strong> para el registro de bajas.
+    </div>
+</div>
+{% endif %}
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>{% if vista_vendidos %}Cerdos vendidos{% elif vista_fallecidos %}Cerdos fallecidos{% else %}Cerdos{% endif %}</h2>
+        <div class="btn-group">
+            <a href="{% url 'registro:corrales' %}" class="btn-sm btn-secondary">Corrales</a>
+            <a href="{% url 'registro:lotes' %}" class="btn-sm btn-secondary">Lotes</a>
+            <a href="{% url 'registro:cerdo_crear' %}" class="btn-sm btn-panel">+ Registrar cerdo</a>
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form filtros-form--inline">
+            {% if ver_todos %}<input type="hidden" name="ver_todos" value="1">{% endif %}
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Arete, nombre o raza…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-raza">Raza</label>
+                <select name="raza" id="f-raza" class="filtro-input">
+                    <option value="">Todas</option>
+                    {% for valor, nombre in razas %}
+                    <option value="{{ valor }}" {% if raza == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-sexo">Sexo</label>
+                <select name="sexo" id="f-sexo" class="filtro-input">
+                    <option value="">Todos</option>
+                    {% for valor, nombre in sexos %}
+                    <option value="{{ valor }}" {% if sexo == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-corral">Corral</label>
+                <select name="corral" id="f-corral" class="filtro-input">
+                    <option value="">Todos</option>
+                    <option value="sin" {% if corral_id == 'sin' %}selected{% endif %}>Sin corral</option>
+                    {% for cr in corrales %}
+                    <option value="{{ cr.pk }}" {% if corral_id == cr.pk|stringformat:'i' %}selected{% endif %}>{{ cr.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-categoria">Categoría</label>
+                <select name="categoria" id="f-categoria" class="filtro-input">
+                    <option value="">Todas</option>
+                    <option value="sin" {% if categoria_id == 'sin' %}selected{% endif %}>Sin categoría</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.pk }}" {% if categoria_id == cat.pk|stringformat:'i' %}selected{% endif %}>{{ cat.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-estado">Estado</label>
+                <select name="estado" id="f-estado" class="filtro-input">
+                    <option value="" {% if not estado %}selected{% endif %}>Todos</option>
+                    {% for valor, nombre in estados %}
+                    <option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-edad">Edad</label>
+                <select name="edad" id="f-edad" class="filtro-input">
+                    <option value="">Todas</option>
+                    {% for m in edades_meses %}
+                    <option value="{{ m }}" {% if edad == m|stringformat:'i' %}selected{% endif %}>
+                        {% if m == 0 %}&lt; 1 mes{% elif m == 1 %}1 mes{% else %}{{ m }} meses{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="f-peso">Peso</label>
+                <select name="peso" id="f-peso" class="filtro-input">
+                    <option value="">Todos</option>
+                    {% for p in pesos_kg %}
+                    <option value="{{ p }}" {% if peso == p|stringformat:'s' %}selected{% endif %}>{{ p|floatformat:2 }} kg</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% if vista_vendidos %}?estado=vendido{% elif vista_fallecidos %}?estado=fallecido{% elif vista_todos_estados %}?estado={% else %}{% url 'registro:cerdos' %}{% endif %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="panel-table">
+        <thead><tr>
+            <th>Arete</th><th>Nombre</th><th>Categoría</th><th>Raza</th><th>Sexo</th>
+            <th>Edad</th><th>Peso</th>
+            {% if vista_vendidos %}
+            <th>Fecha venta</th><th>Precio (S/.)</th>
+            {% elif vista_fallecidos %}
+            <th>Fecha fallecimiento</th>
+            {% elif vista_todos_estados %}
+            <th>Estado</th><th>Fecha salida</th><th>Precio (S/.)</th>
+            {% else %}
+            <th>Estado</th><th>Corral</th>
+            {% endif %}
+            <th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for c in cerdos %}
+            <tr>
+                <td><a href="{% url 'registro:cerdo_detalle' c.pk %}"><strong>{{ c.arete }}</strong></a></td>
+                <td>{{ c.nombre|default:"—" }}</td>
+                <td>
+                    {% if c.categoria %}<span class="badge">{{ c.categoria.nombre }}</span>
+                    {% elif c.estado == 'activo' %}<span class="badge badge-warning">Sin asignar</span>
+                    {% else %}—{% endif %}
+                </td>
+                <td>{{ c.raza_display }}</td>
+                <td>{{ c.get_sexo_display }}</td>
+                <td title="Nacimiento: {{ c.fecha_nacimiento }}">{{ c.edad_display }}</td>
+                <td>{% if c.peso_actual %}{{ c.peso_actual|floatformat:2 }} kg{% else %}<span class="badge badge-warning">Sin peso</span>{% endif %}</td>
+                {% if vista_vendidos %}
+                <td>{{ c.fecha_salida|default:"—" }}</td>
+                <td>{% if c.precio_venta %}S/. {{ c.precio_venta|floatformat:2 }}{% else %}—{% endif %}</td>
+                {% elif vista_fallecidos %}
+                <td>{{ c.fecha_salida|default:"—" }}</td>
+                {% elif vista_todos_estados %}
+                <td>
+                    {% if c.estado == 'activo' %}
+                    <span class="badge badge-success">En granja</span>
+                    {% elif c.estado == 'vendido' %}
+                    <span class="badge badge-warning">Vendido</span>
+                    {% else %}
+                    <span class="badge badge-danger">Fallecido</span>
+                    {% endif %}
+                </td>
+                <td>{{ c.fecha_salida|default:"—" }}</td>
+                <td>{% if c.precio_venta %}S/. {{ c.precio_venta|floatformat:2 }}{% else %}—{% endif %}</td>
+                {% else %}
+                <td>
+                    {% if c.estado == 'activo' %}
+                    <span class="badge badge-success">En granja</span>
+                    {% elif c.estado == 'vendido' %}
+                    <span class="badge badge-warning">Vendido</span>
+                    {% else %}
+                    <span class="badge badge-danger">Fallecido</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if c.corral %}{{ c.corral.nombre }}
+                    {% elif c.estado == 'activo' %}<span class="badge badge-warning">Sin corral</span>
+                    {% else %}—{% endif %}
+                </td>
+                {% endif %}
+                <td class="acciones-cerdo">
+                    {% if c.estado == 'activo' %}
+                    <span class="acciones-cerdo__grupo">
+                        <button type="button" class="btn-sm btn-panel" title="Registrar peso"
+                                data-modal-peso data-arete="{{ c.arete }}"
+                                data-peso-anterior="{% if c.peso_actual %}{{ c.peso_actual }}{% endif %}"
+                                data-url="{% url 'registro:cerdo_peso' c.pk %}?{{ query }}">Pesar</button>
+                        <button type="button" class="btn-sm btn-success" title="Marcar como vendido"
+                                data-modal-estado="vendido" data-arete="{{ c.arete }}"
+                                data-url="{% url 'registro:cerdo_estado' c.pk %}?{{ query }}">Vender</button>
+                        <button type="button" class="btn-sm btn-outline-danger" title="Registrar fallecimiento"
+                                data-modal-estado="fallecido" data-arete="{{ c.arete }}"
+                                data-url="{% url 'registro:cerdo_estado' c.pk %}?{{ query }}">Falleció</button>
+                    </span>
+                    <span class="acciones-cerdo__sep" aria-hidden="true"></span>
+                    {% endif %}
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'registro:cerdo_editar' c.pk %}" class="btn-sm btn-secondary">Editar</a>
+                        <a href="{% url 'registro:cerdo_eliminar' c.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="12" class="table-empty">No hay cerdos con estos filtros</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% include 'panel/registro/_modal_estado.html' %}
+{% include 'panel/registro/_modal_peso.html' %}
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Alta detallada — parto {{ parto.fecha|date:"d/m/Y" }} · madre <strong>{{ parto.madre.arete }}</strong>
+    · pendientes: <strong>{{ pendientes }}</strong>
+</p>
+
+{% include 'panel/inseminacion/_tabs.html' %}
+
+<div class="panel-table-wrap repro-form-wrap repro-form-wrap--wide">
+    <div class="repro-form-head">
+        <h2>Lechón por lechón</h2>
+        <a href="{% url 'inseminacion:parto_lechones' parto.pk %}" class="btn-sm btn-secondary">← Elegir otro modo</a>
+    </div>
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+
+        {% if comun.non_field_errors %}
+        <div class="alert alert-error">{{ comun.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <h3 class="repro-form-section">Datos comunes (toda la camada)</h3>
+        {% include 'panel/inseminacion/_lechones_campos_comunes.html' with form=comun prefix='id_' form_id='det' %}
+
+        <h3 class="repro-form-section">Filas por lechón</h3>
+        <div class="lechones-formset-toolbar">
+            <div class="filtros-field filtros-field--select">
+                <label class="filtros-label" for="id-cantidad">Cantidad de filas</label>
+                <input type="number" name="cantidad" id="id-cantidad" value="{{ cantidad }}" min="1" max="{{ pendientes }}" class="filtro-input">
+            </div>
+            <button type="submit" name="accion" value="generar" class="btn-sm btn-secondary">Regenerar filas</button>
+        </div>
+
+        {{ formset.management_form }}
+        <div class="lechones-formset-wrap">
+            <table class="panel-table lechones-formset-table">
+                <colgroup>
+                    <col class="lechones-col lechones-col--num">
+                    <col class="lechones-col lechones-col--sexo">
+                    <col class="lechones-col lechones-col--peso">
+                    <col class="lechones-col lechones-col--obs">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="lechones-formset-table__num">#</th>
+                        <th>Sexo</th>
+                        <th class="lechones-formset-table__peso-h">Peso <span class="text-muted-sm">(kg)</span></th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                    <tr>
+                        <td class="lechones-formset-table__num">{{ forloop.counter }}</td>
+                        <td class="lechones-formset-table__sexo">
+                            {{ form.sexo }}
+                            {% if form.sexo.errors %}<span class="field-error">{{ form.sexo.errors.0 }}</span>{% endif %}
+                        </td>
+                        <td class="lechones-formset-table__peso">{{ form.peso_actual }}</td>
+                        <td class="lechones-formset-table__obs">{{ form.observaciones }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-actions btn-group">
+            <button type="submit" name="accion" value="registrar" class="btn-sm btn-panel">Dar de alta en Registro</button>
+            <a href="{% url 'inseminacion:parto_lechones' parto.pk %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

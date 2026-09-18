@@ -1,0 +1,64 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Mensajes{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Consultas del <a href="{{ contacto_url }}" target="_blank" rel="noopener">formulario de contacto</a> del sitio web.
+</p>
+
+{% if total_mensajes %}
+<div class="kpi-grid kpi-grid--compact kpi-grid--narrow">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ total_mensajes }}</div>
+        <div class="kpi-label">Total</div>
+    </div>
+    <div class="kpi-card{% if sin_leer %} warning{% endif %}">
+        <div class="kpi-value">{{ sin_leer }}</div>
+        <div class="kpi-label">Sin leer</div>
+    </div>
+</div>
+{% endif %}
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header"><h2>Bandeja de entrada</h2></div>
+
+    {% if mensajes %}
+    <table class="panel-table">
+        <thead><tr><th>Estado</th><th>Nombre</th><th>Asunto</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <tbody>
+            {% for m in mensajes %}
+            <tr class="{% if not m.leido %}mensaje-row--nuevo{% endif %}">
+                <td>{% if m.leido %}<span class="badge badge-success">Leído</span>{% else %}<span class="badge badge-warning">Nuevo</span>{% endif %}</td>
+                <td>{% if not m.leido %}<strong>{{ m.nombre }}</strong>{% else %}{{ m.nombre }}{% endif %}</td>
+                <td>{{ m.asunto }}</td>
+                <td><a href="mailto:{{ m.email }}">{{ m.email }}</a></td>
+                <td>{{ m.created_at|date:"d/m/Y H:i" }}</td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'panel:mensaje_detalle' m.pk %}" class="btn-sm btn-panel">Ver</a>
+                    </span>
+                    {% if es_admin %}
+                    <span class="acciones-cerdo__sep" aria-hidden="true"></span>
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'panel:mensaje_eliminar' m.pk %}" class="btn-sm btn-outline-danger">Eliminar</a>
+                    </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="panel-empty">
+        <span class="panel-empty__icon" aria-hidden="true">✉️</span>
+        <h3 class="panel-empty__title">Bandeja vacía</h3>
+        <p class="panel-empty__text">
+            Cuando alguien envíe el formulario de contacto del sitio web, el mensaje aparecerá aquí.
+        </p>
+        <div class="panel-empty__actions">
+            <a href="{{ contacto_url }}" target="_blank" rel="noopener" class="btn-sm btn-panel">Abrir formulario de contacto</a>
+            <a href="{% url 'publico:inicio' %}" target="_blank" rel="noopener" class="btn-sm btn-secondary">Ver sitio web</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

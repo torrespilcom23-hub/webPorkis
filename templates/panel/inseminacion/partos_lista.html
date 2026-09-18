@@ -1,0 +1,122 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Inseminación{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Partos registrados a partir de inseminaciones con diagnóstico <strong>positivo</strong>.
+</p>
+
+{% include 'panel/inseminacion/_flujo_reproductivo.html' with collapsible=True %}
+{% include 'panel/inseminacion/_tabs.html' %}
+
+<div class="kpi-grid kpi-grid--compact kpi-grid--repro">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ page_obj.paginator.count }}</div>
+        <div class="kpi-label">Resultados</div>
+    </div>
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ partos_mes }}</div>
+        <div class="kpi-label">Partos este mes</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value">{{ lechones_nacidos_mes }}</div>
+        <div class="kpi-label">Lechones vivos (mes)</div>
+    </div>
+    {% if preñadas_activas %}
+    <a href="{% url 'inseminacion:index' %}?resultado=preñadas" class="kpi-card warning">
+        <div class="kpi-value">{{ preñadas_activas }}</div>
+        <div class="kpi-label">Preñadas sin parto</div>
+    </a>
+    {% endif %}
+</div>
+
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Historial de partos</h2>
+        <div class="btn-group">
+            <a href="{% url 'inseminacion:parto_crear' %}" class="btn-sm btn-panel">+ Registrar parto</a>
+        </div>
+    </div>
+
+    <div class="filtros-panel">
+        <form method="get" class="filtros-form filtros-form--inline">
+            <div class="filtros-field filtros-field--buscar">
+                <label class="filtros-label" for="f-q">Buscar cerda</label>
+                <input type="text" name="q" id="f-q" value="{{ q }}" placeholder="Arete o nombre…" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-desde">Desde</label>
+                <input type="date" name="desde" id="f-desde" value="{{ desde }}" class="filtro-input">
+            </div>
+            <div class="filtros-field filtros-field--fecha">
+                <label class="filtros-label" for="f-hasta">Hasta</label>
+                <input type="date" name="hasta" id="f-hasta" value="{{ hasta }}" class="filtro-input">
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn-sm btn-panel">Filtrar</button>
+                <a href="{% url 'inseminacion:partos' %}" class="btn-sm btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="panel-table panel-table--repro">
+        <thead><tr>
+            <th>Cerda</th>
+            <th>Parto</th>
+            <th>Inseminación</th>
+            <th>Padrillo</th>
+            <th>Nacidos</th>
+            <th>En Registro</th>
+            <th class="col-hide-sm">Destetados</th>
+            <th>Acciones</th>
+        </tr></thead>
+        <tbody>
+            {% for p in partos %}
+            <tr>
+                <td>{% include 'panel/inseminacion/_celda_cerda.html' with cerda=p.inseminacion.cerda %}</td>
+                <td><strong>{{ p.fecha|date:"d/m/Y" }}</strong></td>
+                <td>{{ p.inseminacion.fecha|date:"d/m/Y" }}</td>
+                <td>{% if p.inseminacion.padrillo %}{{ p.inseminacion.padrillo.codigo }}{% else %}<span class="text-muted-sm">—</span>{% endif %}</td>
+                <td>
+                    <span class="repro-lechones repro-lechones--vivos" title="Nacidos vivos">{{ p.lechones_vivos }}</span>
+                    {% if p.lechones_muertos %}
+                    <span class="repro-lechones repro-lechones--muertos" title="Nacidos muertos">{{ p.lechones_muertos }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge{% if p.num_lechones_reg >= p.lechones_vivos %} badge-success{% endif %}">{{ p.num_lechones_reg }} / {{ p.lechones_vivos }}</span>
+                </td>
+                <td class="col-hide-sm">{{ p.lechones_destetados|default:"—" }}</td>
+                <td class="acciones-cerdo">
+                    <span class="acciones-cerdo__grupo">
+                        {% if p.puede_dar_alta_lechones %}
+                        <a href="{% url 'inseminacion:parto_lechones' p.pk %}" class="btn-sm btn-panel">Alta Registro</a>
+                        {% endif %}
+                        <a href="{% url 'inseminacion:parto_editar' p.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    </span>
+                    {% if es_admin %}
+                    <span class="acciones-cerdo__sep" aria-hidden="true"></span>
+                    <span class="acciones-cerdo__grupo">
+                        <a href="{% url 'inseminacion:parto_eliminar' p.pk %}" class="btn-sm btn-outline-danger">Eliminar</a>
+                    </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="table-empty">Sin partos registrados. Use <strong>+ Registrar parto</strong> cuando una cerda preñada pare.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="paginacion">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">← Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&{{ query }}{% endif %}" class="btn-sm btn-secondary">Siguiente →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

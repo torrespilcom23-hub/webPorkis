@@ -1,0 +1,136 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_heading %}Dashboard{% endblock %}
+
+{% block panel_content %}
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-value">{{ total_cerdos }}</div>
+        <div class="kpi-label">Cerdos activos</div>
+    </div>
+    <div class="kpi-card {% if productos_stock_bajo %}danger{% endif %}">
+        <div class="kpi-value">{{ productos_stock_bajo }}</div>
+        <div class="kpi-label">Productos stock bajo</div>
+    </div>
+    <a href="{% url 'vacunas:aplicaciones' %}?vista=vencidas" class="kpi-card {% if vacunas_pendientes %}warning{% endif %}" style="text-decoration:none;color:inherit;">
+        <div class="kpi-value">{{ vacunas_pendientes }}</div>
+        <div class="kpi-label">Vacunas por aplicar (7 días)</div>
+    </a>
+    <div class="kpi-card info">
+        <div class="kpi-value">{{ partos_mes }}</div>
+        <div class="kpi-label">Partos este mes</div>
+    </div>
+    <div class="kpi-card {% if diagnosticos_pendientes %}warning{% endif %}">
+        <div class="kpi-value">{{ diagnosticos_pendientes }}</div>
+        <div class="kpi-label">Diagnósticos de preñez pendientes</div>
+    </div>
+    <div class="kpi-card {% if mensajes_nuevos %}info{% endif %}">
+        <div class="kpi-value">{{ mensajes_nuevos }}</div>
+        <div class="kpi-label">Mensajes sin leer</div>
+    </div>
+</div>
+
+<div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="panel-table-wrap">
+        <div class="panel-table-header">
+            <h2>🐖 Stock por corral</h2>
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-panel">Ver stock</a>
+        </div>
+        <table class="panel-table">
+            <thead><tr><th>Corral</th><th>Cerdos en granja</th></tr></thead>
+            <tbody>
+                {% for cr in stock_por_corral %}
+                <tr>
+                    <td><a href="{% url 'registro:cerdos' %}?corral={{ cr.pk }}">{{ cr.nombre }}</a></td>
+                    <td><span class="badge badge-success">{{ cr.total }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" style="text-align:center;color:#9ca3af;">Sin cerdos asignados a corrales</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="panel-table-wrap">
+        <div class="panel-table-header">
+            <h2>⚖️ Cerdos sin peso registrado</h2>
+            <a href="{% url 'registro:cerdos' %}?sin_peso=1" class="btn-sm btn-panel">Ver listado</a>
+        </div>
+        <div style="padding:2rem; text-align:center;">
+            {% if cerdos_sin_peso %}
+            <div class="kpi-value" style="font-size:2.5rem; color:#92400e;">{{ cerdos_sin_peso }}</div>
+            <p style="color:#6b7280; margin-top:0.5rem;">cerdo(s) en granja sin peso. Use <strong>Pesar</strong> en el stock.</p>
+            {% else %}
+            <p style="color:#166534;">Todos los cerdos en granja tienen peso registrado.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="panel-table-wrap">
+        <div class="panel-table-header">
+            <h2>⚠️ Alertas de stock</h2>
+            <a href="{% url 'inventario:lista' %}" class="btn-sm btn-panel">Ver inventario</a>
+        </div>
+        <table class="panel-table">
+            <thead><tr><th>Producto</th><th>Stock</th><th>Mínimo</th></tr></thead>
+            <tbody>
+                {% for p in alertas_stock %}
+                <tr>
+                    <td>{{ p.nombre }}</td>
+                    <td><span class="badge badge-danger">{{ p.stock_actual }}</span></td>
+                    <td>{{ p.stock_minimo }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" style="text-align:center;color:#9ca3af;">Sin alertas de stock</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel-table-wrap">
+        <div class="panel-table-header">
+            <h2>💉 Vacunas pendientes</h2>
+            <a href="{% url 'vacunas:aplicaciones' %}?vista=vencidas" class="btn-sm btn-panel">Ver vencidas</a>
+        </div>
+        <table class="panel-table">
+            <thead><tr><th>Cerdo</th><th>Vacuna</th><th>Próxima dosis</th></tr></thead>
+            <tbody>
+                {% for v in alertas_vacunas %}
+                <tr>
+                    <td><a href="{% url 'registro:cerdo_detalle' v.cerdo.pk %}"><strong>{{ v.cerdo.arete }}</strong></a></td>
+                    <td>{{ v.vacuna.nombre }}</td>
+                    <td>
+                        <span class="badge {% if v.proxima_dosis <= hoy %}badge-danger{% else %}badge-warning{% endif %}">{{ v.proxima_dosis }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" style="text-align:center;color:#9ca3af;">Sin vacunas pendientes</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="panel-table-wrap" style="margin-top:1.5rem;">
+    <div class="panel-table-header">
+        <h2>🧬 Diagnósticos de preñez pendientes ({{ dias_diagnostico }}+ días)</h2>
+        <a href="{% url 'inseminacion:index' %}" class="btn-sm btn-panel">Ver inseminaciones</a>
+    </div>
+    <table class="panel-table">
+        <thead><tr><th>Cerda</th><th>Fecha inseminación</th><th>Tipo</th><th>Acción</th></tr></thead>
+        <tbody>
+            {% for i in alertas_diagnostico %}
+            <tr>
+                <td>{{ i.cerda.arete }}</td>
+                <td><span class="badge badge-warning">{{ i.fecha }}</span></td>
+                <td>{{ i.get_tipo_display }}</td>
+                <td><a href="{% url 'inseminacion:diagnostico' i.pk %}" class="btn-sm btn-panel">Registrar diagnóstico</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align:center;color:#9ca3af;">Sin diagnósticos pendientes</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

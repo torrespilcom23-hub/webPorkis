@@ -1,0 +1,36 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Corrales{% endblock %}
+{% block panel_content %}
+<div class="alert alert-success panel-hint">
+    Los corrales son las ubicaciones físicas donde se alojan los cerdos (Corral 1, Gestación, Engorde…).
+    Asígnelos al registrar o editar cada cerdo para el control de stock por ubicación.
+</div>
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Corrales</h2>
+        <div class="btn-group">
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-secondary">Volver a cerdos</a>
+            <a href="{% url 'registro:corral_crear' %}" class="btn-sm btn-panel">+ Nuevo corral</a>
+        </div>
+    </div>
+    <table class="panel-table">
+        <thead><tr><th>Nombre</th><th>Capacidad</th><th>Cerdos en granja</th><th>Observaciones</th><th>Acciones</th></tr></thead>
+        <tbody>
+            {% for cr in corrales %}
+            <tr>
+                <td><strong>{{ cr.nombre }}</strong></td>
+                <td>{% if cr.capacidad %}{{ cr.capacidad }}{% else %}—{% endif %}</td>
+                <td><span class="badge badge-success">{{ cr.total_cerdos }}</span></td>
+                <td>{{ cr.observaciones|default:"—" }}</td>
+                <td class="btn-group">
+                    <a href="{% url 'registro:corral_editar' cr.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    <a href="{% url 'registro:corral_eliminar' cr.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="table-empty">No hay corrales registrados</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

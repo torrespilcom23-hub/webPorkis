@@ -1,0 +1,42 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}Categorías de cerdos{% endblock %}
+{% block panel_content %}
+<div class="alert alert-success panel-hint">
+    ℹ️ Las categorías clasifican a los cerdos según su etapa o función
+    (Lechón, Engorde, Pie de cría...). Puedes crear las que tu granja necesite.
+</div>
+<div class="panel-table-wrap">
+    <div class="panel-table-header">
+        <h2>Categorías</h2>
+        <div class="btn-group">
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-secondary">Volver a cerdos</a>
+            <a href="{% url 'registro:categoria_crear' %}" class="btn-sm btn-panel">+ Nueva categoría</a>
+        </div>
+    </div>
+    <table class="panel-table">
+        <thead><tr><th>Nombre</th><th>Descripción</th><th>Rango de edad</th><th>Cerdos en granja</th><th>Acciones</th></tr></thead>
+        <tbody>
+            {% for cat in categorias %}
+            <tr>
+                <td><strong>{{ cat.nombre }}</strong></td>
+                <td>{{ cat.descripcion|default:"—" }}</td>
+                <td>
+                    {% if cat.edad_min_dias != None or cat.edad_max_dias != None %}
+                        {% if cat.edad_min_dias != None %}{{ cat.edad_min_dias }}{% else %}0{% endif %}
+                        —
+                        {% if cat.edad_max_dias != None %}{{ cat.edad_max_dias }} días{% else %}en adelante{% endif %}
+                    {% else %}—{% endif %}
+                </td>
+                <td><span class="badge badge-success">{{ cat.total_cerdos }}</span></td>
+                <td class="btn-group">
+                    <a href="{% url 'registro:categoria_editar' cat.pk %}" class="btn-sm btn-secondary">Editar</a>
+                    <a href="{% url 'registro:categoria_eliminar' cat.pk %}" class="btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="table-empty">No hay categorías registradas</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

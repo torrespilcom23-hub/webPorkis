@@ -1,0 +1,49 @@
+{% extends 'panel/base_panel.html' %}
+{% block page_heading %}{{ titulo }}{% endblock %}
+{% block panel_content %}
+<p class="page-subtitle">
+    Defina el alimento en el catálogo. Las <strong>indicaciones</strong> son notas internas; proteína, proveedor y costo son opcionales.
+</p>
+
+<div class="panel-table-wrap catalog-form-wrap">
+    <form method="post" class="panel-form panel-form--compact">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <div class="form-grid-compact catalog-form-grid catalog-form-grid--alimento">
+            <div class="form-row form-row--nombre">
+                <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}<span class="field-error">{{ form.nombre.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--proteina">
+                <label for="{{ form.proteina_pct.id_for_label }}">{{ form.proteina_pct.label }} <span class="label-opt">opcional</span></label>
+                {{ form.proteina_pct }}
+                <small class="field-hint">{{ form.proteina_pct.help_text }}</small>
+                {% if form.proteina_pct.errors %}<span class="field-error">{{ form.proteina_pct.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row form-row--proveedor">
+                <label for="{{ form.proveedor.id_for_label }}">{{ form.proveedor.label }} <span class="label-opt">opcional</span></label>
+                {{ form.proveedor }}
+            </div>
+            <div class="form-row form-row--costo">
+                <label for="{{ form.costo_por_kg.id_for_label }}">{{ form.costo_por_kg.label }} <span class="label-opt">opcional</span></label>
+                {{ form.costo_por_kg }}
+            </div>
+            <div class="form-row form-row--indicaciones">
+                <label for="{{ form.notas.id_for_label }}">{{ form.notas.label }} <span class="label-opt">opcional</span></label>
+                {{ form.notas }}
+                <small class="field-hint">{{ form.notas.help_text }}</small>
+                {% if form.notas.errors %}<span class="field-error">{{ form.notas.errors.0 }}</span>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions btn-group">
+            <button type="submit" class="btn-sm btn-panel">Guardar en catálogo</button>
+            <a href="{% url cancel_url|default:'alimentos:catalogo' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
