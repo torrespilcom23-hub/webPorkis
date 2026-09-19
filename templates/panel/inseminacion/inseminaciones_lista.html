@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 {% block page_heading %}Inseminación{% endblock %}
 {% block panel_content %}
 <p class="page-subtitle">
@@ -123,7 +123,7 @@
             <th>Diagnóstico <span class="th-hint" title="Control recomendado a los 21 días del servicio. Usted registra el resultado (positivo, negativo o dudoso).">ⓘ</span></th>
             <th>Parto <span class="th-hint" title="Estimado: fecha de inseminación + 114 días si el diagnóstico fue positivo. Al parir, registre el parto real.">ⓘ</span></th>
             <th class="col-hide-sm">Registró</th>
-            <th>Acciones</th>
+            <th class="col-acciones">Acciones</th>
         </tr></thead>
         <tbody>
             {% for i in inseminaciones %}
@@ -137,7 +137,7 @@
                 <td>{% include 'panel/inseminacion/_badge_diagnostico.html' with inseminacion=i %}</td>
                 <td>{% include 'panel/inseminacion/_celda_parto.html' with inseminacion=i %}</td>
                 <td class="col-hide-sm"><span class="text-muted-sm">{{ i.responsable.username }}</span></td>
-                <td class="acciones-cerdo">
+                <td class="col-acciones acciones-cerdo">
                     <span class="acciones-cerdo__grupo">
                         {% if i.puede_registrar_diagnostico %}
                         <a href="{% url 'inseminacion:diagnostico' i.pk %}" class="btn-sm {% if i.estado_diagnostico == 'vencido' %}btn-danger{% else %}btn-panel{% endif %}"{% if i.estado_diagnostico == 'vencido' %} title="Superó los {{ dias_diagnostico }} días recomendados"{% endif %}>Diagnóstico</a>

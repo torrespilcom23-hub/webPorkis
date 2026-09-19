@@ -1,28 +1,19 @@
-from django.db import models, transaction
+from django.db import models
 from django.utils import timezone
 
 
 class CorrelativoArete(models.Model):
-    """Contador único para autogenerar aretes de cerdos (A-0001, A-0002...)."""
+    """Contador por prefijo de categoría (CH-0001, LE-0002, SC-0001...)."""
 
+    prefijo = models.CharField(max_length=10, unique=True)
     ultimo = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = 'Correlativo de arete'
         verbose_name_plural = 'Correlativos de arete'
 
-
-def generar_arete():
-    """Genera el siguiente arete, p. ej. A-0001. Seguro ante concurrencia."""
-    with transaction.atomic():
-        correlativo, _ = (
-            CorrelativoArete.objects
-            .select_for_update()
-            .get_or_create(pk=1)
-        )
-        correlativo.ultimo += 1
-        correlativo.save(update_fields=['ultimo'])
-        return f'A-{correlativo.ultimo:04d}'
+    def __str__(self):
+        return f'{self.prefijo} (último {self.ultimo})'
 
 
 class CategoriaCerdo(models.Model):
@@ -112,7 +103,7 @@ class Cerdo(models.Model):
 
     arete = models.CharField(
         'Arete / Código', max_length=50, unique=True, blank=True,
-        help_text='Se genera automáticamente (A-0001, A-0002...).',
+        help_text='Se genera automáticamente según categoría (ej.: CH-0001).',
     )
     nombre = models.CharField(max_length=100, blank=True)
     raza = models.CharField(max_length=20, choices=Raza.choices)
@@ -190,8 +181,20 @@ class Cerdo(models.Model):
         return self.get_raza_display()
 
     def save(self, *args, **kwargs):
-        if not self.arete:
-            self.arete = generar_arete()
+        from .aretes import generar_arete
+
+        categoria_cambio = False
+        if self.pk:
+            anterior = (
+                Cerdo.objects
+                .filter(pk=self.pk)
+                .values_list('categoria_id', flat=True)
+                .first()
+            )
+            categoria_cambio = anterior != self.categoria_id
+
+        if not self.arete or categoria_cambio:
+            self.arete = generar_arete(self.categoria)
         super().save(*args, **kwargs)
 
     @property

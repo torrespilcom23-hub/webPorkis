@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="{% static 'css/panel.css' %}?v={{ static_version }}">
 </head>
 <body class="panel-body">
-    <aside class="panel-sidebar">
+    <div id="panel-sidebar-backdrop" class="panel-sidebar-backdrop" hidden aria-hidden="true"></div>
+    <aside class="panel-sidebar" id="panel-sidebar">
         <div class="panel-brand">
             🐷 Granja Porkis
             <span>Panel de control</span>
@@ -30,7 +31,12 @@
 
     <div class="panel-main">
         <header class="panel-header">
-            <h1>{% block page_heading %}Dashboard{% endblock %}</h1>
+            <div class="panel-header-start">
+                <button type="button" class="panel-nav-toggle" id="panel-nav-toggle" aria-label="Abrir menú del panel" aria-expanded="false" aria-controls="panel-sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <h1>{% block page_heading %}Dashboard{% endblock %}</h1>
+            </div>
             <div class="panel-user">
                 <span class="user-name">👤 {{ request.user.get_full_name|default:request.user.username }}</span>
                 <a href="{% url 'panel:cambiar_password' %}" class="btn-sm btn-secondary">Cambiar contraseña</a>
@@ -111,6 +117,7 @@
         });
     })();
     </script>
+    <script src="{% static 'js/panel.js' %}?v={{ static_version }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

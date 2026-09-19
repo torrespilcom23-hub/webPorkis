@@ -1,24 +1,17 @@
 import re
-from datetime import timedelta
 from urllib.parse import quote
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
-from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.views.generic import TemplateView
 
-from alimentos.models import RegistroAlimentacion
-from inseminacion.models import DIAS_DIAGNOSTICO, Inseminacion, Parto
-from inventario.models import Producto
 from publico.models import MensajeContacto
-from registro.models import Cerdo, Corral
-from vacunas.models import AplicacionVacuna
 
 from .decorators import admin_required
+from .queries import resumen_dashboard
 
 
 class PanelLoginView(LoginView):
@@ -44,47 +37,7 @@ class DashboardView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        hoy = timezone.now().date()
-        proxima_semana = hoy + timedelta(days=7)
-        limite_diagnostico = hoy - timedelta(days=DIAS_DIAGNOSTICO)
-
-        context.update({
-            'hoy': hoy,
-            'dias_diagnostico': DIAS_DIAGNOSTICO,
-            'total_cerdos': Cerdo.objects.filter(estado='activo').count(),
-            'productos_stock_bajo': Producto.objects.filter(stock_actual__lte=F('stock_minimo')).count(),
-            'vacunas_pendientes': AplicacionVacuna.objects.filter(
-                proxima_dosis__lte=proxima_semana,
-            ).count(),
-            'partos_mes': Parto.objects.filter(
-                fecha__year=hoy.year,
-                fecha__month=hoy.month,
-            ).count(),
-            'mensajes_nuevos': MensajeContacto.objects.filter(leido=False).count(),
-            'diagnosticos_pendientes': Inseminacion.objects.filter(
-                fecha__lte=limite_diagnostico,
-                diagnostico__isnull=True,
-            ).count(),
-            'alertas_stock': Producto.objects.filter(stock_actual__lte=F('stock_minimo'))[:5],
-            'alertas_vacunas': AplicacionVacuna.objects.filter(
-                proxima_dosis__lte=proxima_semana,
-            ).select_related('cerdo', 'vacuna')[:5],
-            'alertas_diagnostico': Inseminacion.objects.filter(
-                fecha__lte=limite_diagnostico,
-                diagnostico__isnull=True,
-            ).select_related('cerda')[:5],
-            'inseminaciones_recientes': Inseminacion.objects.select_related('cerda')[:5],
-            'registros_alimentacion': RegistroAlimentacion.objects.select_related('lote')[:5],
-            'stock_por_corral': (
-                Corral.objects
-                .annotate(total=Count('cerdos', filter=Q(cerdos__estado='activo')))
-                .filter(total__gt=0)
-                .order_by('-total')[:5]
-            ),
-            'cerdos_sin_peso': Cerdo.objects.filter(
-                estado='activo', peso_actual__isnull=True,
-            ).count(),
-        })
+        context.update(resumen_dashboard())
         return context
 
 

@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 {% block page_heading %}Mensajes{% endblock %}
 {% block panel_content %}
 <p class="page-subtitle">
@@ -23,7 +23,7 @@
 
     {% if mensajes %}
     <table class="panel-table">
-        <thead><tr><th>Estado</th><th>Nombre</th><th>Asunto</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Estado</th><th>Nombre</th><th>Asunto</th><th>Email</th><th>Fecha</th><th class="col-acciones">Acciones</th></tr></thead>
         <tbody>
             {% for m in mensajes %}
             <tr class="{% if not m.leido %}mensaje-row--nuevo{% endif %}">
@@ -32,7 +32,7 @@
                 <td>{{ m.asunto }}</td>
                 <td><a href="mailto:{{ m.email }}">{{ m.email }}</a></td>
                 <td>{{ m.created_at|date:"d/m/Y H:i" }}</td>
-                <td class="acciones-cerdo">
+                <td class="col-acciones acciones-cerdo">
                     <span class="acciones-cerdo__grupo">
                         <a href="{% url 'panel:mensaje_detalle' m.pk %}" class="btn-sm btn-panel">Ver</a>
                     </span>

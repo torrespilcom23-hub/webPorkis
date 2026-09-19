@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 {% block page_heading %}Categorías de cerdos{% endblock %}
 {% block panel_content %}
 <div class="alert alert-success panel-hint">
@@ -14,7 +14,7 @@
         </div>
     </div>
     <table class="panel-table">
-        <thead><tr><th>Nombre</th><th>Descripción</th><th>Rango de edad</th><th>Cerdos en granja</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Descripción</th><th>Rango de edad</th><th>Cerdos en granja</th><th class="col-acciones">Acciones</th></tr></thead>
         <tbody>
             {% for cat in categorias %}
             <tr>
@@ -28,7 +28,7 @@
                     {% else %}—{% endif %}
                 </td>
                 <td><span class="badge badge-success">{{ cat.total_cerdos }}</span></td>
-                <td class="btn-group">
+                <td class="col-acciones btn-group">
                     <a href="{% url 'registro:categoria_editar' cat.pk %}" class="btn-sm btn-secondary">Editar</a>
                     <a href="{% url 'registro:categoria_eliminar' cat.pk %}" class="btn-sm btn-danger">Eliminar</a>
                 </td>

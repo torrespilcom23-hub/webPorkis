@@ -22,7 +22,7 @@
     {% include 'partials/footer.html' %}
     {% include 'partials/whatsapp_button.html' %}
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/main.js' %}?v={{ static_version }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

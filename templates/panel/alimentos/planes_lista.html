@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 {% block page_heading %}Raciones por lote{% endblock %}
 {% block panel_content %}
 <p class="page-subtitle">
@@ -68,7 +68,7 @@
     <table class="panel-table">
         <thead><tr>
             <th>Lote <span class="th-hint" title="Grupo de cerdos (Registro → Lotes)">ⓘ</span></th>
-            <th>Alimento</th><th>kg/día</th><th>Etapa</th><th>Estado</th><th>Acciones</th>
+            <th>Alimento</th><th>kg/día</th><th>Etapa</th><th>Estado</th><th class="col-acciones">Acciones</th>
         </tr></thead>
         <tbody>
             {% for p in planes %}
@@ -86,7 +86,7 @@
                     <span class="badge badge-warning">Inactiva</span>
                     {% endif %}
                 </td>
-                <td class="acciones-cerdo">
+                <td class="col-acciones acciones-cerdo">
                     <span class="acciones-cerdo__grupo">
                         {% if p.activo %}
                         <a href="{% url 'alimentos:registro_crear' %}?plan={{ p.pk }}" class="btn-sm btn-panel" title="Registrar consumo con datos de la ración">Consumo</a>

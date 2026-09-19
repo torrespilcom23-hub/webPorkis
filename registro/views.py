@@ -91,8 +91,16 @@ def cerdo_editar(request, pk):
     if request.method == 'POST':
         form = CerdoForm(request.POST, instance=cerdo)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Cerdo {cerdo.arete} actualizado correctamente.')
+            arete_anterior = cerdo.arete
+            cerdo = form.save()
+            if cerdo.arete != arete_anterior:
+                messages.success(
+                    request,
+                    f'Cerdo actualizado. Arete: {arete_anterior} → {cerdo.arete} '
+                    f'(según categoría).',
+                )
+            else:
+                messages.success(request, f'Cerdo {cerdo.arete} actualizado correctamente.')
             return redirect('registro:cerdos')
     else:
         form = CerdoForm(instance=cerdo)

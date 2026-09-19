@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 
 {% block page_heading %}Inventario{% endblock %}
 
@@ -51,7 +51,7 @@
         <thead>
             <tr>
                 <th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock</th>
-                <th>Vencimiento</th><th>Acciones</th>
+                <th>Vencimiento</th><th class="col-acciones">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -70,7 +70,7 @@
                     {% elif p.por_vencer %}<span class="badge badge-warning">{{ p.fecha_vencimiento }}</span>
                     {% else %}{{ p.fecha_vencimiento|default:"—" }}{% endif %}
                 </td>
-                <td class="btn-group">
+                <td class="col-acciones btn-group">
                     <a href="{% url 'inventario:editar' p.pk %}" class="btn-sm btn-secondary">Editar</a>
                     <a href="{% url 'inventario:eliminar' p.pk %}" class="btn-sm btn-danger">Eliminar</a>
                 </td>

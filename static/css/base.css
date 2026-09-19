@@ -294,6 +294,11 @@ main { padding-top: 72px; }
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+    .container { width: min(1140px, 94%); }
+    .main-nav { gap: 1.25rem; }
+}
+
 @media (max-width: 768px) {
     .nav-toggle { display: flex; }
 

@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 
 {% block page_heading %}Historial de movimientos{% endblock %}
 
@@ -28,7 +28,7 @@
     </div>
 
     <table class="panel-table">
-        <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th><th>Registrado por</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th><th>Registrado por</th><th class="col-acciones">Acciones</th></tr></thead>
         <tbody>
             {% for m in movimientos %}
             <tr>
@@ -41,7 +41,7 @@
                 <td>{{ m.cantidad }} {{ m.producto.unidad }}</td>
                 <td>{{ m.motivo|default:"—" }}</td>
                 <td>{{ m.registrado_por.username }}</td>
-                <td><a href="{% url 'inventario:movimiento_eliminar' m.pk %}" class="btn-sm btn-danger">Eliminar</a></td>
+                <td class="col-acciones"><a href="{% url 'inventario:movimiento_eliminar' m.pk %}" class="btn-sm btn-danger">Eliminar</a></td>
             </tr>
             {% empty %}
             <tr><td colspan="7" style="text-align:center;color:#9ca3af;">Sin movimientos registrados</td></tr>

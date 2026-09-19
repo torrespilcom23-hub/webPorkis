@@ -1,136 +1,242 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
+{% load static %}
 
 {% block page_heading %}Dashboard{% endblock %}
 
 {% block panel_content %}
-<div class="kpi-grid">
-    <div class="kpi-card">
-        <div class="kpi-value">{{ total_cerdos }}</div>
-        <div class="kpi-label">Cerdos activos</div>
-    </div>
-    <div class="kpi-card {% if productos_stock_bajo %}danger{% endif %}">
-        <div class="kpi-value">{{ productos_stock_bajo }}</div>
-        <div class="kpi-label">Productos stock bajo</div>
-    </div>
-    <a href="{% url 'vacunas:aplicaciones' %}?vista=vencidas" class="kpi-card {% if vacunas_pendientes %}warning{% endif %}" style="text-decoration:none;color:inherit;">
-        <div class="kpi-value">{{ vacunas_pendientes }}</div>
-        <div class="kpi-label">Vacunas por aplicar (7 días)</div>
-    </a>
-    <div class="kpi-card info">
-        <div class="kpi-value">{{ partos_mes }}</div>
-        <div class="kpi-label">Partos este mes</div>
-    </div>
-    <div class="kpi-card {% if diagnosticos_pendientes %}warning{% endif %}">
-        <div class="kpi-value">{{ diagnosticos_pendientes }}</div>
-        <div class="kpi-label">Diagnósticos de preñez pendientes</div>
-    </div>
-    <div class="kpi-card {% if mensajes_nuevos %}info{% endif %}">
-        <div class="kpi-value">{{ mensajes_nuevos }}</div>
-        <div class="kpi-label">Mensajes sin leer</div>
-    </div>
+<div class="dashboard-page" data-any-alert="{% if dashboard_any_alert %}true{% else %}false{% endif %}">
+
+<div class="dashboard-toolbar">
+    <label class="dashboard-mode-toggle" for="dashboard-solo-alertas">
+        <input type="checkbox" id="dashboard-solo-alertas" checked aria-describedby="dashboard-mode-hint">
+        <span class="dashboard-mode-toggle__track" aria-hidden="true"></span>
+        <span class="dashboard-mode-toggle__label">Solo alertas</span>
+    </label>
+    <p id="dashboard-mode-hint" class="dashboard-mode-hint">Oculta bloques al día. Los KPIs siempre se muestran.</p>
 </div>
 
-<div class="grid-2" style="margin-bottom:1.5rem;">
-    <div class="panel-table-wrap">
-        <div class="panel-table-header">
-            <h2>🐖 Stock por corral</h2>
-            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-panel">Ver stock</a>
+<div class="kpi-grid kpi-grid--dashboard">
+    <a href="{% url 'registro:cerdos' %}" class="kpi-card kpi-card--compact" title="Cerdos en granja{% if peso_promedio %} · Prom. {{ peso_promedio|floatformat:1 }} kg{% endif %}">
+        <div class="kpi-value">{{ total_activos }}</div>
+        <div class="kpi-label">Cerdos</div>
+        {% if peso_promedio %}<div class="kpi-sub">{{ peso_promedio|floatformat:1 }} kg prom.</div>{% endif %}
+    </a>
+    <a href="{% url 'inventario:lista' %}?stock_bajo=1" class="kpi-card kpi-card--compact {% if productos_stock_bajo %}danger{% endif %}" title="Productos con stock en o bajo el mínimo">
+        <div class="kpi-value">{{ productos_stock_bajo }}</div>
+        <div class="kpi-label">Stock bajo</div>
+    </a>
+    <a href="{% url 'vacunas:aplicaciones' %}?vista={% if vacunas_vencidas %}vencidas{% else %}proximas{% endif %}" class="kpi-card kpi-card--compact {% if vacunas_vencidas %}danger{% elif vacunas_alertas %}warning{% endif %}" title="Vacunas vencidas o próximas ({{ dias_alerta_vacunas }} días)">
+        <div class="kpi-value">{{ vacunas_alertas }}</div>
+        <div class="kpi-label">Vacunas</div>
+        {% if vacunas_alertas %}<div class="kpi-sub">{{ vacunas_vencidas }}v · {{ vacunas_proximas }}p</div>{% endif %}
+    </a>
+    <a href="{% url 'inseminacion:partos' %}" class="kpi-card kpi-card--compact info" title="Partos del mes{% if lechones_nacidos_mes %} · {{ lechones_nacidos_mes }} lechones vivos{% endif %}">
+        <div class="kpi-value">{{ partos_mes }}</div>
+        <div class="kpi-label">Partos/mes</div>
+        {% if lechones_nacidos_mes %}<div class="kpi-sub">{{ lechones_nacidos_mes }} lechón(es)</div>{% endif %}
+    </a>
+    <a href="{% url 'inseminacion:index' %}?vista=pendientes" class="kpi-card kpi-card--compact {% if pendientes_diagnostico %}warning{% endif %}" title="Diagnósticos de preñez pendientes{% if preñadas_activas %} · {{ preñadas_activas }} preñadas{% endif %}">
+        <div class="kpi-value">{{ pendientes_diagnostico }}</div>
+        <div class="kpi-label">Diag. preñez</div>
+        {% if preñadas_activas %}<div class="kpi-sub">{{ preñadas_activas }} preñada(s)</div>{% endif %}
+    </a>
+    <a href="{% url 'panel:mensajes' %}" class="kpi-card kpi-card--compact {% if mensajes_nuevos %}info{% endif %}" title="Mensajes de contacto sin leer">
+        <div class="kpi-value">{{ mensajes_nuevos }}</div>
+        <div class="kpi-label">Mensajes</div>
+    </a>
+</div>
+
+<div id="dashboard-all-clear" class="dashboard-all-clear" hidden>
+    <strong>Todo en orden</strong>
+    <p>No hay alertas pendientes en stock, vacunas, pesajes, reproducción ni mensajes. Desactiva «Solo alertas» para ver el detalle operativo.</p>
+</div>
+
+<div class="grid-dashboard">
+    <div class="panel-table-wrap panel-table-wrap--compact dashboard-panel" data-has-alert="{% if panel_alert_corral %}true{% else %}false{% endif %}">
+        <div class="panel-table-header dashboard-card-head">
+            <h2>🐖 Por corral</h2>
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-panel">Stock</a>
         </div>
-        <table class="panel-table">
-            <thead><tr><th>Corral</th><th>Cerdos en granja</th></tr></thead>
+        <table class="panel-table panel-table--compact">
+            <thead><tr><th>Corral</th><th class="col-num">Nº</th></tr></thead>
             <tbody>
                 {% for cr in stock_por_corral %}
                 <tr>
                     <td><a href="{% url 'registro:cerdos' %}?corral={{ cr.pk }}">{{ cr.nombre }}</a></td>
-                    <td><span class="badge badge-success">{{ cr.total }}</span></td>
+                    <td class="col-num"><span class="badge badge-success">{{ cr.total }}</span></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="2" style="text-align:center;color:#9ca3af;">Sin cerdos asignados a corrales</td></tr>
+                <tr><td colspan="2" class="panel-empty">Sin corrales con cerdos</td></tr>
                 {% endfor %}
+                {% if sin_corral %}
+                <tr class="dashboard-row-muted">
+                    <td><a href="{% url 'registro:cerdos' %}?sin_corral=1">Sin corral</a></td>
+                    <td class="col-num"><span class="badge badge-warning">{{ sin_corral }}</span></td>
+                </tr>
+                {% endif %}
+                {% if total_activos %}
+                <tr class="dashboard-row-total">
+                    <td><strong>Total</strong></td>
+                    <td class="col-num"><strong>{{ total_activos }}</strong></td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
-    <div class="panel-table-wrap">
-        <div class="panel-table-header">
-            <h2>⚖️ Cerdos sin peso registrado</h2>
-            <a href="{% url 'registro:cerdos' %}?sin_peso=1" class="btn-sm btn-panel">Ver listado</a>
+
+    <div class="panel-table-wrap panel-table-wrap--compact dashboard-panel" data-has-alert="{% if panel_alert_categoria %}true{% else %}false{% endif %}">
+        <div class="panel-table-header dashboard-card-head">
+            <h2>📊 Por categoría</h2>
+            <a href="{% url 'registro:cerdos' %}" class="btn-sm btn-panel">Stock</a>
         </div>
-        <div style="padding:2rem; text-align:center;">
-            {% if cerdos_sin_peso %}
-            <div class="kpi-value" style="font-size:2.5rem; color:#92400e;">{{ cerdos_sin_peso }}</div>
-            <p style="color:#6b7280; margin-top:0.5rem;">cerdo(s) en granja sin peso. Use <strong>Pesar</strong> en el stock.</p>
-            {% else %}
-            <p style="color:#166534;">Todos los cerdos en granja tienen peso registrado.</p>
-            {% endif %}
+        <table class="panel-table panel-table--compact">
+            <thead><tr><th>Categoría</th><th class="col-num">Nº</th></tr></thead>
+            <tbody>
+                {% for row in conteos_categoria %}
+                <tr>
+                    <td><a href="{% url 'registro:cerdos' %}?categoria={{ row.categoria_id }}">{{ row.categoria__nombre }}</a></td>
+                    <td class="col-num"><span class="badge badge-success">{{ row.total }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="panel-empty">Sin categorías</td></tr>
+                {% endfor %}
+                {% if sin_categoria %}
+                <tr class="dashboard-row-muted">
+                    <td><a href="{% url 'registro:cerdos' %}?categoria=sin">Sin categoría</a></td>
+                    <td class="col-num"><span class="badge badge-warning">{{ sin_categoria }}</span></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel-table-wrap panel-table-wrap--compact dashboard-panel" data-has-alert="{% if panel_alert_sin_peso %}true{% else %}false{% endif %}">
+        <div class="panel-table-header dashboard-card-head">
+            <h2>⚖️ Sin peso</h2>
+            <a href="{% url 'registro:cerdos' %}?sin_peso=1" class="btn-sm btn-panel">Listado</a>
         </div>
+        {% if sin_peso %}
+        <table class="panel-table panel-table--compact">
+            <tbody>
+                {% for c in cerdos_sin_peso_lista %}
+                <tr>
+                    <td><a href="{% url 'registro:cerdo_detalle' c.pk %}"><strong>{{ c.arete }}</strong></a>{% if c.nombre %} <span class="text-muted">{{ c.nombre }}</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+                {% if cerdos_sin_peso_extra %}
+                <tr><td class="text-muted">… y {{ cerdos_sin_peso_extra }} más</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="dashboard-ok-line">Todos con peso registrado</div>
+        {% endif %}
     </div>
 </div>
 
-<div class="grid-2">
-    <div class="panel-table-wrap">
-        <div class="panel-table-header">
-            <h2>⚠️ Alertas de stock</h2>
-            <a href="{% url 'inventario:lista' %}" class="btn-sm btn-panel">Ver inventario</a>
+<div class="grid-dashboard">
+    <div class="panel-table-wrap panel-table-wrap--compact dashboard-panel" data-has-alert="{% if panel_alert_stock %}true{% else %}false{% endif %}">
+        <div class="panel-table-header dashboard-card-head">
+            <h2>⚠️ Stock bajo</h2>
+            <a href="{% url 'inventario:lista' %}?stock_bajo=1" class="btn-sm btn-panel">Inventario</a>
         </div>
-        <table class="panel-table">
-            <thead><tr><th>Producto</th><th>Stock</th><th>Mínimo</th></tr></thead>
+        <table class="panel-table panel-table--compact">
+            <thead><tr><th>Producto</th><th class="col-num">Stock</th></tr></thead>
             <tbody>
                 {% for p in alertas_stock %}
                 <tr>
-                    <td>{{ p.nombre }}</td>
-                    <td><span class="badge badge-danger">{{ p.stock_actual }}</span></td>
-                    <td>{{ p.stock_minimo }}</td>
+                    <td><a href="{% url 'inventario:detalle' p.pk %}">{{ p.nombre|truncatechars:22 }}</a></td>
+                    <td class="col-num"><span class="badge badge-danger">{{ p.stock_actual }}</span></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="3" style="text-align:center;color:#9ca3af;">Sin alertas de stock</td></tr>
+                <tr><td colspan="2" class="panel-empty">Sin alertas</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <div class="panel-table-wrap">
-        <div class="panel-table-header">
-            <h2>💉 Vacunas pendientes</h2>
-            <a href="{% url 'vacunas:aplicaciones' %}?vista=vencidas" class="btn-sm btn-panel">Ver vencidas</a>
+    <div class="panel-table-wrap panel-table-wrap--compact dashboard-panel" data-has-alert="{% if panel_alert_vacunas %}true{% else %}false{% endif %}">
+        <div class="panel-table-header dashboard-card-head">
+            <h2>💉 Vacunas</h2>
+            <a href="{% url 'vacunas:aplicaciones' %}?vista=vencidas" class="btn-sm btn-panel">Alertas</a>
         </div>
-        <table class="panel-table">
-            <thead><tr><th>Cerdo</th><th>Vacuna</th><th>Próxima dosis</th></tr></thead>
+        <table class="panel-table panel-table--compact">
+            <thead><tr><th>Cerdo</th><th class="col-num">Dosis</th></tr></thead>
             <tbody>
                 {% for v in alertas_vacunas %}
                 <tr>
-                    <td><a href="{% url 'registro:cerdo_detalle' v.cerdo.pk %}"><strong>{{ v.cerdo.arete }}</strong></a></td>
-                    <td>{{ v.vacuna.nombre }}</td>
-                    <td>
-                        <span class="badge {% if v.proxima_dosis <= hoy %}badge-danger{% else %}badge-warning{% endif %}">{{ v.proxima_dosis }}</span>
-                    </td>
+                    <td><a href="{% url 'registro:cerdo_detalle' v.cerdo.pk %}">{{ v.cerdo.arete }}</a> <span class="text-muted">{{ v.vacuna.nombre|truncatechars:12 }}</span></td>
+                    <td class="col-num"><span class="badge {% if v.proxima_dosis <= hoy %}badge-danger{% else %}badge-warning{% endif %}">{{ v.proxima_dosis|date:"d/m" }}</span></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="3" style="text-align:center;color:#9ca3af;">Sin vacunas pendientes</td></tr>
+                <tr><td colspan="2" class="panel-empty">Al día ({{ dias_alerta_vacunas }}d)</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel-table-wrap panel-table-wrap--compact dashboard-panel" data-has-alert="{% if panel_alert_alimentacion %}true{% else %}false{% endif %}">
+        <div class="panel-table-header dashboard-card-head">
+            <h2>🌾 Alimentación <span class="dashboard-inline-stat">{{ kg_servido_mes|floatformat:0 }} kg · {{ registros_alimentacion_mes }} reg.</span></h2>
+            <a href="{% url 'alimentos:index' %}" class="btn-sm btn-panel">Consumo</a>
+        </div>
+        <table class="panel-table panel-table--compact">
+            <thead><tr><th>Fecha</th><th>Lote</th><th class="col-num">Kg</th></tr></thead>
+            <tbody>
+                {% for r in registros_alimentacion %}
+                <tr>
+                    <td>{{ r.fecha|date:"d/m" }}</td>
+                    <td>{{ r.lote.nombre|truncatechars:14 }}</td>
+                    <td class="col-num">{{ r.cantidad_servida_kg }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="panel-empty">Sin registros</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 
-<div class="panel-table-wrap" style="margin-top:1.5rem;">
-    <div class="panel-table-header">
-        <h2>🧬 Diagnósticos de preñez pendientes ({{ dias_diagnostico }}+ días)</h2>
-        <a href="{% url 'inseminacion:index' %}" class="btn-sm btn-panel">Ver inseminaciones</a>
+<div class="panel-table-wrap panel-table-wrap--compact dashboard-block-last dashboard-panel" data-has-alert="{% if panel_alert_repro %}true{% else %}false{% endif %}">
+    <div class="panel-table-header dashboard-card-head">
+        <h2>🧬 Diag. preñez ({{ dias_diagnostico }}+ días)</h2>
+        <a href="{% url 'inseminacion:index' %}?vista=pendientes" class="btn-sm btn-panel">Inseminaciones</a>
     </div>
-    <table class="panel-table">
-        <thead><tr><th>Cerda</th><th>Fecha inseminación</th><th>Tipo</th><th>Acción</th></tr></thead>
+    <table class="panel-table panel-table--compact">
+        <thead><tr><th>Cerda</th><th>Fecha</th><th>Tipo</th><th class="col-acciones"></th></tr></thead>
         <tbody>
             {% for i in alertas_diagnostico %}
             <tr>
-                <td>{{ i.cerda.arete }}</td>
-                <td><span class="badge badge-warning">{{ i.fecha }}</span></td>
+                <td><a href="{% url 'registro:cerdo_detalle' i.cerda.pk %}">{{ i.cerda.arete }}</a></td>
+                <td><span class="badge badge-warning">{{ i.fecha|date:"d/m/Y" }}</span></td>
                 <td>{{ i.get_tipo_display }}</td>
-                <td><a href="{% url 'inseminacion:diagnostico' i.pk %}" class="btn-sm btn-panel">Registrar diagnóstico</a></td>
+                <td class="col-acciones"><a href="{% url 'inseminacion:diagnostico' i.pk %}" class="btn-sm btn-panel">Diagnosticar</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="4" style="text-align:center;color:#9ca3af;">Sin diagnósticos pendientes</td></tr>
+            <tr><td colspan="4" class="panel-empty">Sin diagnósticos pendientes</td></tr>
             {% endfor %}
         </tbody>
     </table>
+    {% if inseminaciones_recientes or padrillos_bajo_stock %}
+    <div class="dashboard-footer-note">
+        {% if inseminaciones_recientes %}
+        <strong>Inseminaciones:</strong>
+        {% for i in inseminaciones_recientes %}
+        <a href="{% url 'inseminacion:editar' i.pk %}">{{ i.cerda.arete }}</a> ({{ i.fecha|date:"d/m" }}){% if not forloop.last %} · {% endif %}
+        {% endfor %}
+        {% if inseminaciones_mes %} · {{ inseminaciones_mes }}/mes{% endif %}
+        {% endif %}
+        {% if padrillos_bajo_stock %}
+        {% if inseminaciones_recientes %} · {% endif %}
+        <span class="text-warning">{{ padrillos_bajo_stock }} padrillo(s) con poco stock de pajuelas</span>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}?v={{ static_version }}"></script>
 {% endblock %}

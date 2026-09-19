@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 {% block page_heading %}Lotes{% endblock %}
 {% block panel_content %}
 <p class="page-subtitle">
@@ -23,7 +23,7 @@
         </div>
     </div>
     <table class="panel-table">
-        <thead><tr><th>Nombre</th><th>Corral</th><th>Ingreso</th><th>Cerdos en granja</th><th>Meta peso</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Corral</th><th>Ingreso</th><th>Cerdos en granja</th><th>Meta peso</th><th class="col-acciones">Acciones</th></tr></thead>
         <tbody>
             {% for l in lotes %}
             <tr>
@@ -32,7 +32,7 @@
                 <td>{{ l.fecha_ingreso|date:"d/m/Y" }}</td>
                 <td><span class="badge badge-success">{{ l.num_cerdos }}</span></td>
                 <td>{% if l.meta_peso %}{{ l.meta_peso }} kg{% else %}—{% endif %}</td>
-                <td class="btn-group">
+                <td class="col-acciones btn-group">
                     <a href="{% url 'alimentos:planes' %}?q={{ l.nombre|urlencode }}" class="btn-sm btn-panel" title="Ver ración de alimentación">Ración</a>
                     <a href="{% url 'registro:lote_editar' l.pk %}" class="btn-sm btn-secondary">Editar</a>
                 </td>

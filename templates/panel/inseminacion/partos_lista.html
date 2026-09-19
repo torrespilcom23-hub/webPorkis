@@ -1,4 +1,4 @@
-{% extends 'panel/base_panel.html' %}
+﻿{% extends 'panel/base_panel.html' %}
 {% block page_heading %}Inseminación{% endblock %}
 {% block panel_content %}
 <p class="page-subtitle">
@@ -67,7 +67,7 @@
             <th>Nacidos</th>
             <th>En Registro</th>
             <th class="col-hide-sm">Destetados</th>
-            <th>Acciones</th>
+            <th class="col-acciones">Acciones</th>
         </tr></thead>
         <tbody>
             {% for p in partos %}
@@ -86,7 +86,7 @@
                     <span class="badge{% if p.num_lechones_reg >= p.lechones_vivos %} badge-success{% endif %}">{{ p.num_lechones_reg }} / {{ p.lechones_vivos }}</span>
                 </td>
                 <td class="col-hide-sm">{{ p.lechones_destetados|default:"—" }}</td>
-                <td class="acciones-cerdo">
+                <td class="col-acciones acciones-cerdo">
                     <span class="acciones-cerdo__grupo">
                         {% if p.puede_dar_alta_lechones %}
                         <a href="{% url 'inseminacion:parto_lechones' p.pk %}" class="btn-sm btn-panel">Alta Registro</a>
