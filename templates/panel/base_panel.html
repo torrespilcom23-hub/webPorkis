@@ -25,6 +25,9 @@
             <a href="{% url 'inseminacion:index' %}" {% if '/inseminacion/' in request.path %}class="active"{% endif %}>🧬 Inseminación</a>
             <a href="{% url 'reportes:index' %}" {% if '/reportes/' in request.path %}class="active"{% endif %}>📋 Reportes</a>
             <a href="{% url 'panel:mensajes' %}" {% if '/mensajes/' in request.path %}class="active"{% endif %}>✉️ Mensajes{% if mensajes_sin_leer %} <span class="badge badge-warning" style="margin-left:auto;">{{ mensajes_sin_leer }}</span>{% endif %}</a>
+            {% if es_admin %}
+            <a href="{% url 'panel:usuarios' %}" {% if '/usuarios/' in request.path %}class="active"{% endif %}>👤 Usuarios</a>
+            {% endif %}
             <a href="{% url 'publico:inicio' %}" target="_blank">🌐 Ver sitio web</a>
         </nav>
     </aside>

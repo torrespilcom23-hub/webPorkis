@@ -13,7 +13,11 @@
         <div class="login-box">
             <h1>🐷 Granja Porkis</h1>
             <p class="subtitle">Panel de administración</p>
-            {% if form.errors %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-error">{{ message }}</div>
+            {% endfor %}
+            {% elif form.errors %}
             <div class="alert alert-error">Usuario o contraseña incorrectos.</div>
             {% endif %}
             <form method="post" class="panel-form" style="box-shadow:none; padding:0; max-width:none;">
