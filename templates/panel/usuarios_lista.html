@@ -1,18 +1,20 @@
 {% extends 'panel/base_panel.html' %}
 
-{% block page_heading %}Usuarios del panel{% endblock %}
+{% block page_heading %}Usuarios{% endblock %}
 
 {% block panel_content %}
-<div class="kpi-grid kpi-grid--compact" style="max-width:20rem; margin-bottom:1rem;">
+<p class="page-subtitle">Cuentas con acceso al panel: operadores y administradores.</p>
+
+<div class="kpi-grid kpi-grid--compact kpi-grid--usuarios">
     <div class="kpi-card">
         <div class="kpi-value">{{ total }}</div>
-        <div class="kpi-label">Usuarios con acceso</div>
+        <div class="kpi-label">Con acceso</div>
     </div>
 </div>
 
-<div class="panel-table-wrap">
-    <div class="panel-table-header">
-        <h2>👤 Cuentas</h2>
+<div class="panel-table-wrap usuario-list-wrap">
+    <div class="panel-form-card-head">
+        <h2>Cuentas</h2>
         <a href="{% url 'panel:usuario_crear' %}" class="btn-sm btn-panel">+ Nuevo usuario</a>
     </div>
     <table class="panel-table">
@@ -42,7 +44,7 @@
                     <span class="acciones-cerdo__grupo">
                         <a href="{% url 'panel:usuario_reset_password' f.usuario.pk %}" class="btn-sm btn-secondary">Contraseña</a>
                         {% if not f.usuario.is_superuser and f.usuario.pk != user.pk %}
-                        <form method="post" action="{% url 'panel:usuario_toggle_activo' f.usuario.pk %}" style="display:inline;">
+                        <form method="post" action="{% url 'panel:usuario_toggle_activo' f.usuario.pk %}">
                             {% csrf_token %}
                             <button type="submit" class="btn-sm {% if f.activo %}btn-outline-danger{% else %}btn-panel{% endif %}">
                                 {% if f.activo %}Desactivar{% else %}Activar{% endif %}
@@ -53,14 +55,14 @@
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="panel-empty">No hay usuarios. Ejecute seed_data o cree uno nuevo.</td></tr>
+            <tr><td colspan="5" class="panel-empty">No hay usuarios. Ejecute <code>seed_data</code> o cree uno nuevo.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-<p style="margin-top:1rem; font-size:0.82rem; color:#6b7280; max-width:42rem;">
+<p class="usuario-page-note">
     Los <strong>operadores</strong> usan el panel en operación diaria (sin eliminar registros críticos).
     Los <strong>administradores</strong> además pueden borrar datos y gestionar usuarios.
-    La contraseña la puede cambiar cada usuario en «Cambiar contraseña».
+    Cada usuario puede cambiar su contraseña en «Cambiar contraseña».
 </p>
 {% endblock %}

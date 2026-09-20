@@ -18,6 +18,9 @@
         </div>
         <nav class="panel-nav">
             <a href="{% url 'panel:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+            {% if es_admin %}
+            <a href="{% url 'panel:usuarios' %}" {% if '/usuarios/' in request.path %}class="active"{% endif %}>👤 Usuarios</a>
+            {% endif %}
             <a href="{% url 'inventario:lista' %}" {% if 'inventario' in request.path %}class="active"{% endif %}>📦 Inventario</a>
             <a href="{% url 'registro:cerdos' %}" {% if '/registro/' in request.path %}class="active"{% endif %}>🐖 Registro</a>
             <a href="{% url 'vacunas:aplicaciones' %}" {% if '/vacunas/' in request.path %}class="active"{% endif %}>💉 Vacunas</a>
@@ -25,9 +28,6 @@
             <a href="{% url 'inseminacion:index' %}" {% if '/inseminacion/' in request.path %}class="active"{% endif %}>🧬 Inseminación</a>
             <a href="{% url 'reportes:index' %}" {% if '/reportes/' in request.path %}class="active"{% endif %}>📋 Reportes</a>
             <a href="{% url 'panel:mensajes' %}" {% if '/mensajes/' in request.path %}class="active"{% endif %}>✉️ Mensajes{% if mensajes_sin_leer %} <span class="badge badge-warning" style="margin-left:auto;">{{ mensajes_sin_leer }}</span>{% endif %}</a>
-            {% if es_admin %}
-            <a href="{% url 'panel:usuarios' %}" {% if '/usuarios/' in request.path %}class="active"{% endif %}>👤 Usuarios</a>
-            {% endif %}
             <a href="{% url 'publico:inicio' %}" target="_blank">🌐 Ver sitio web</a>
         </nav>
     </aside>
@@ -41,7 +41,7 @@
                 <h1>{% block page_heading %}Dashboard{% endblock %}</h1>
             </div>
             <div class="panel-user">
-                <span class="user-name">👤 {{ request.user.get_full_name|default:request.user.username }}</span>
+                <span class="user-name" title="Rol en el panel">👤 {{ request.user.username }}<span class="panel-user-rol"> · {{ rol_panel }}</span></span>
                 <a href="{% url 'panel:cambiar_password' %}" class="btn-sm btn-secondary">Cambiar contraseña</a>
                 <form method="post" action="{% url 'panel:logout' %}" style="display:inline;">
                     {% csrf_token %}

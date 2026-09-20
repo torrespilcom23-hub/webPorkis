@@ -44,6 +44,12 @@
         <div class="kpi-value">{{ mensajes_nuevos }}</div>
         <div class="kpi-label">Mensajes</div>
     </a>
+    {% if es_admin %}
+    <a href="{% url 'panel:usuarios' %}" class="kpi-card kpi-card--compact" title="Crear operadores, restablecer contraseñas y activar cuentas">
+        <div class="kpi-value">👤</div>
+        <div class="kpi-label">Usuarios</div>
+    </a>
+    {% endif %}
 </div>
 
 <div id="dashboard-all-clear" class="dashboard-all-clear" hidden>

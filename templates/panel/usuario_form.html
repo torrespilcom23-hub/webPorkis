@@ -1,24 +1,75 @@
 {% extends 'panel/base_panel.html' %}
 
-{% block page_heading %}{{ titulo }}{% endblock %}
+{% block page_heading %}Usuarios{% endblock %}
 
 {% block panel_content %}
-<form method="post" class="panel-form">
-    {% csrf_token %}
-    {% if form.non_field_errors %}
-    <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
-    {% endif %}
-    {% for field in form %}
-    <div class="form-row">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.help_text %}<span class="form-help">{{ field.help_text }}</span>{% endif %}
-        {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+<p class="page-subtitle">Alta de cuenta con acceso al panel de la granja.</p>
+
+<div class="panel-table-wrap usuario-form-wrap">
+    <div class="panel-form-card-head">
+        <h2>{{ titulo }}</h2>
+        <a href="{% url 'panel:usuarios' %}" class="btn-sm btn-secondary">← Lista</a>
     </div>
-    {% endfor %}
-    <div class="form-actions">
-        <button type="submit" class="btn-sm btn-panel">Crear usuario</button>
-        <a href="{% url 'panel:usuarios' %}" class="btn-sm btn-secondary">Cancelar</a>
-    </div>
-</form>
+    <form method="post" class="panel-form panel-form--compact usuario-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error usuario-form-alert">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <section class="usuario-form-section" aria-labelledby="usuario-datos-heading">
+            <h3 id="usuario-datos-heading" class="usuario-form-section__title">Datos de acceso</h3>
+            <div class="usuario-form-grid">
+                <div class="form-row">
+                    <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                    {{ form.username }}
+                    {% if form.username.help_text %}<span class="field-hint">{{ form.username.help_text }}</span>{% endif %}
+                    {% if form.username.errors %}<span class="field-error">{{ form.username.errors.0 }}</span>{% endif %}
+                </div>
+                <div class="form-row">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="label-opt">opcional</span></label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
+                </div>
+                <div class="form-row">
+                    <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+                    {{ form.password1 }}
+                    {% if form.password1.help_text %}<span class="field-hint">{{ form.password1.help_text }}</span>{% endif %}
+                    {% if form.password1.errors %}<span class="field-error">{{ form.password1.errors.0 }}</span>{% endif %}
+                </div>
+                <div class="form-row">
+                    <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}<span class="field-error">{{ form.password2.errors.0 }}</span>{% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="usuario-form-section" aria-labelledby="usuario-rol-heading">
+            <h3 id="usuario-rol-heading" class="usuario-form-section__title">{{ form.rol.label }}</h3>
+            <div class="usuario-rol-grid">
+                {% for option in form.rol %}
+                <label class="usuario-rol-card" for="{{ option.id_for_label }}">
+                    {{ option.tag }}
+                    <span class="usuario-rol-card__text">
+                        <span class="usuario-rol-card__title">{{ option.choice_label }}</span>
+                        <span class="usuario-rol-card__desc">
+                            {% if option.data.value == 'admin' %}
+                            Borrados, mensajes y gestión de usuarios.
+                            {% else %}
+                            Registro y consulta diaria; sin eliminar registros críticos.
+                            {% endif %}
+                        </span>
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.rol.errors %}<span class="field-error">{{ form.rol.errors.0 }}</span>{% endif %}
+        </section>
+
+        <div class="form-actions btn-group usuario-form-actions">
+            <button type="submit" class="btn-sm btn-panel">Crear usuario</button>
+            <a href="{% url 'panel:usuarios' %}" class="btn-sm btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
 {% endblock %}

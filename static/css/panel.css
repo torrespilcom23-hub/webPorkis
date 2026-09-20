@@ -138,6 +138,12 @@ body.panel-nav-open {
     color: #1f2937;
 }
 
+.panel-user-rol {
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 0.85em;
+}
+
 .panel-content { padding: 2rem; flex: 1; }
 .panel-content:has(.dashboard-page) { padding: 1rem 1.15rem 1.15rem; }
 
@@ -347,6 +353,11 @@ body.panel-nav-open {
 .kpi-grid--compact {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     max-width: 520px;
+}
+
+.kpi-grid--usuarios {
+    max-width: 11rem;
+    margin-bottom: 1rem;
 }
 
 .catalog-form-grid--alimento {
@@ -1916,6 +1927,11 @@ select.filtro-input {
     flex-shrink: 0;
 }
 
+.acciones-cerdo__grupo form {
+    display: inline-flex;
+    margin: 0;
+}
+
 .acciones-cerdo__sep {
     display: inline-block;
     width: 1px;
@@ -2550,3 +2566,209 @@ select.filtro-input {
     margin-top: 1.25rem;
 }
 .modal-actions .btn-sm { padding: 0.5rem 1rem; }
+
+/* Usuarios del panel — formularios */
+.usuario-list-wrap .panel-table {
+    border-radius: 0 0 12px 12px;
+}
+
+.usuario-page-note {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+    max-width: 42rem;
+    line-height: 1.45;
+}
+
+.usuario-form-wrap {
+    max-width: 36rem;
+}
+
+.panel-form-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.55rem 0.85rem 0.55rem 0.75rem;
+    margin: 0;
+    border-bottom: 1px solid #e2e8df;
+    background: linear-gradient(180deg, #f6faf3 0%, #eef4e8 100%);
+    position: relative;
+}
+
+.panel-form-card-head::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--panel-accent);
+}
+
+.panel-form-card-head h2 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e3a0f;
+    letter-spacing: -0.01em;
+}
+
+.panel-form-card-head .btn-sm.btn-panel {
+    padding: 0.28rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid #b8c9ae;
+    color: var(--panel-accent);
+    box-shadow: 0 1px 2px rgba(30, 58, 15, 0.06);
+}
+
+.panel-form-card-head .btn-sm.btn-panel:hover {
+    background: var(--panel-accent);
+    border-color: var(--panel-accent);
+    color: #fff;
+}
+
+.usuario-form-wrap .panel-form--compact {
+    padding: 1.1rem 1.25rem 1.35rem;
+}
+
+.usuario-form-alert {
+    margin-bottom: 1rem;
+}
+
+.usuario-form-section + .usuario-form-section {
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.usuario-form-section__title {
+    margin: 0 0 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.usuario-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+}
+
+.usuario-form-grid .form-row {
+    margin-bottom: 0;
+}
+
+.usuario-form-grid--password {
+    max-width: 28rem;
+}
+
+.usuario-form .panel-form label {
+    font-size: 0.82rem;
+    margin-bottom: 0.3rem;
+}
+
+.usuario-form .input-compact {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.usuario-rol-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.usuario-rol-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.75rem 0.85rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    margin: 0;
+    font-weight: 400;
+}
+
+.usuario-rol-card:hover {
+    border-color: #b8c9ae;
+    background: #fff;
+}
+
+.usuario-rol-card:has(input:checked) {
+    border-color: var(--panel-accent);
+    background: #f0fdf4;
+    box-shadow: 0 0 0 1px rgba(74, 124, 35, 0.15);
+}
+
+.usuario-rol-card input[type="radio"] {
+    margin: 0.2rem 0 0;
+    flex-shrink: 0;
+    accent-color: var(--panel-accent);
+}
+
+.usuario-rol-card__title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.25;
+}
+
+.usuario-rol-card__desc {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    line-height: 1.35;
+    margin-top: 0.2rem;
+}
+
+.usuario-form-actions {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.usuario-form-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    padding: 0.75rem 1.25rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.usuario-form-resumen__label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #9ca3af;
+}
+
+.usuario-form-resumen__value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+@media (max-width: 640px) {
+    .usuario-form-grid,
+    .usuario-rol-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .usuario-form-wrap {
+        max-width: none;
+    }
+}
