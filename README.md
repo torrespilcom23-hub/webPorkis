@@ -63,11 +63,36 @@ python manage.py migrate
 python manage.py seed_data
 ```
 
+**Reiniciar datos de prueba (local):** vacía todas las tablas y deja solo usuarios demo:
+
+```bash
+python manage.py reset_datos_local --force
+```
+
+No borra migraciones ni la estructura; elimina cerdos, inventario, vacunas, mensajes, etc.
+
 ### 5. Ejecutar servidor
 
 ```bash
 python manage.py runserver
 ```
+
+En Windows también puedes usar `iniciar_servidor.bat` (escucha en `0.0.0.0:8000` para pruebas en red).
+
+### Pruebas en red local (otro PC en la misma LAN)
+
+1. En `.env`, incluye tu IP LAN en `ALLOWED_HOSTS` y en `CSRF_TRUSTED_ORIGINS` (ver `.env.example`).
+2. Arranca el servidor escuchando en todas las interfaces:
+   ```bash
+   python manage.py runserver 0.0.0.0:8000
+   ```
+3. En el **Firewall de Windows**, permite entrantes TCP en el puerto **8000** (solo mientras pruebas):
+   ```powershell
+   netsh advfirewall firewall add rule name="Porkis Django 8000" dir=in action=allow protocol=TCP localport=8000
+   ```
+4. El otro usuario abre en su navegador: `http://TU_IP_LAN:8000/panel/` (ej. `http://172.17.74.7:8000/panel/`).
+
+Requisitos: mismo Wi‑Fi o red cableada; tu PC encendido con el servidor corriendo. No expongas esto a Internet público con `DEBUG=True`.
 
 ## URLs
 
@@ -83,7 +108,7 @@ python manage.py runserver
 
 | Usuario | Contraseña | Rol |
 |---------|-----------|-----|
-| `admin` | `admin123` | Administrador (acceso total) |
+| `admin` | `admin2026**` | Administrador (acceso total) |
 | `operador` | `operador123` | Operador (registro y consulta, sin eliminar) |
 
 ## Módulos del panel

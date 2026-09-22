@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = 'Crea grupos admin/operador y asigna admin a superusuarios y al usuario admin'
+    help = 'Arregla grupos admin/operador y el usuario admin si quedó mal.'
 
     def handle(self, *args, **options):
         grupo_admin, _ = Group.objects.get_or_create(name='admin')

@@ -5,12 +5,11 @@ from django.shortcuts import redirect
 
 
 def es_admin(user):
-    """Administrador = superusuario o miembro del grupo 'admin'."""
     return user.is_superuser or user.groups.filter(name='admin').exists()
 
 
 def puede_acceder_panel(user):
-    """Usuarios con acceso al panel: superusuario, admin u operador."""
+    # Superuser, grupo admin u operador.
     if not user.is_authenticated:
         return False
     if user.is_active is False:
@@ -21,7 +20,6 @@ def puede_acceder_panel(user):
 
 
 def rol_panel(user):
-    """Etiqueta legible del rol principal."""
     if not user.is_authenticated:
         return ''
     if user.is_superuser:
@@ -34,10 +32,7 @@ def rol_panel(user):
 
 
 def admin_required(view_func):
-    """Restringe la vista a usuarios con rol administrador.
-
-    Aplicar después de @login_required.
-    """
+    # Usar debajo de @login_required.
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not es_admin(request.user):

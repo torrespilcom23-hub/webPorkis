@@ -7,6 +7,13 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-pro
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
+# Misma IP/puerto con los que abres el panel en la LAN (login y formularios).
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:8000,http://127.0.0.1:8000',
+    cast=Csv(),
+)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -103,6 +110,7 @@ LOGIN_URL = '/panel/login/'
 LOGIN_REDIRECT_URL = '/panel/'
 LOGOUT_REDIRECT_URL = '/'
 
+WHATSAPP_COUNTRY_CODE = config('WHATSAPP_COUNTRY_CODE', default='51')
 WHATSAPP_NUMBER = config('WHATSAPP_NUMBER', default='51904013194')
 WHATSAPP_DEFAULT_MESSAGE = config(
     'WHATSAPP_DEFAULT_MESSAGE',

@@ -1,6 +1,3 @@
-import re
-from urllib.parse import quote
-
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -15,6 +12,7 @@ from publico.models import MensajeContacto
 
 from .decorators import admin_required, puede_acceder_panel, rol_panel
 from .forms import OperadorCreateForm, ResetPasswordAdminForm
+from .mensajes_utils import enlaces_respuesta_mensaje
 from .queries import resumen_dashboard
 
 
@@ -65,40 +63,7 @@ class DashboardView(TemplateView):
         return context
 
 
-# ---------------------------------------------------------------------------
-# Bandeja de mensajes de contacto
-# ---------------------------------------------------------------------------
-
-def _whatsapp_numero(telefono):
-    digitos = re.sub(r'\D', '', telefono or '')
-    if len(digitos) == 9:
-        digitos = f'51{digitos}'
-    return digitos if len(digitos) >= 10 else ''
-
-
-def _enlaces_respuesta(mensaje):
-    cuerpo = (
-        f'Hola {mensaje.nombre},\n\n'
-        f'Gracias por contactar a Granja Porkis.\n\n'
-        f'---\n'
-        f'Su consulta ({mensaje.created_at:%d/%m/%Y}):\n'
-        f'{mensaje.mensaje}'
-    )
-    mailto = (
-        f'mailto:{mensaje.email}'
-        f'?subject={quote(f"Re: {mensaje.asunto}")}'
-        f'&body={quote(cuerpo)}'
-    )
-    wa_url = None
-    numero = _whatsapp_numero(mensaje.telefono)
-    if numero:
-        texto = (
-            f'Hola {mensaje.nombre}, gracias por escribirnos sobre '
-            f'"{mensaje.asunto}". '
-        )
-        wa_url = f'https://wa.me/{numero}?text={quote(texto)}'
-    return mailto, wa_url
-
+# Mensajes del formulario de contacto
 
 @login_required
 def mensajes_lista(request):
@@ -117,7 +82,7 @@ def mensaje_detalle(request, pk):
     if not mensaje.leido:
         mensaje.leido = True
         mensaje.save(update_fields=['leido'])
-    mailto, wa_url = _enlaces_respuesta(mensaje)
+    mailto, wa_url = enlaces_respuesta_mensaje(mensaje)
     return render(request, 'panel/mensaje_detalle.html', {
         'mensaje': mensaje,
         'mailto_url': mailto,
@@ -139,9 +104,7 @@ def mensaje_eliminar(request, pk):
     })
 
 
-# ---------------------------------------------------------------------------
-# Gestión de usuarios del panel (solo administrador)
-# ---------------------------------------------------------------------------
+# Usuarios del panel (solo admin)
 
 @login_required
 @admin_required

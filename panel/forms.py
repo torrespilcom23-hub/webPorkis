@@ -53,7 +53,7 @@ class OperadorCreateForm(UserCreationForm):
 
 
 class ResetPasswordAdminForm(SetPasswordForm):
-    """Contraseña nueva definida por el administrador."""
+    # Clave nueva desde Usuarios (no la cambia el propio operador aquí).
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1,8 +1,20 @@
 from django.contrib.auth.models import Group, User
-from django.test import Client, TestCase
+from django.test import Client, SimpleTestCase, TestCase
 from django.urls import reverse
 
 from panel.decorators import puede_acceder_panel
+from panel.mensajes_utils import normalizar_whatsapp
+
+
+class WhatsappNumeroTest(SimpleTestCase):
+    def test_movil_peru_nueve_digitos(self):
+        self.assertEqual(normalizar_whatsapp('912 345 678'), '51912345678')
+
+    def test_local_ocho_digitos_prefijo_pais(self):
+        self.assertEqual(normalizar_whatsapp('13456665'), '5113456665')
+
+    def test_con_codigo_pais(self):
+        self.assertEqual(normalizar_whatsapp('+51 904 013 194'), '51904013194')
 
 
 class PanelAccessTest(TestCase):

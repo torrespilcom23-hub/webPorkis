@@ -6,7 +6,7 @@ from .decorators import puede_acceder_panel
 
 
 class PanelAccessMiddleware:
-    """Bloquea el panel a usuarios sin grupo admin/operador (salvo login/logout)."""
+    # Sin grupo admin/operador no entra al panel (login/logout sí).
 
     def __init__(self, get_response):
         self.get_response = get_response
